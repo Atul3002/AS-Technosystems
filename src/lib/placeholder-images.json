@@ -1,3 +1,40 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "solution1",
+      "description": "A robotic arm in a modern factory.",
+      "imageUrl": "https://images.unsplash.com/photo-1701328778019-e95dedbf5346?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxyb2JvdCUyMGZhY3Rvcnl8ZW58MHx8fHwxNzcxMDY3MDU1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "robot factory"
+    },
+    {
+      "id": "solution2",
+      "description": "Cloud computing concept with digital icons.",
+      "imageUrl": "https://images.unsplash.com/photo-1667984390553-7f439e6ae401?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxjbG91ZCUyMGNvbXB1dGluZ3xlbnwwfHx8fDE3NzExNjc5NTh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "cloud computing"
+    },
+    {
+      "id": "solution3",
+      "description": "Smart city with data flowing between buildings.",
+      "imageUrl": "https://images.unsplash.com/photo-1519010470956-6d877008eaa4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxzbWFydCUyMGNpdHl8ZW58MHx8fHwxNzcxMTY3OTU4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "smart city"
+    },
+    {
+      "id": "testimonial1",
+      "description": "Portrait of a smiling professional woman.",
+      "imageUrl": "https://images.unsplash.com/photo-1696453424673-8b05ed67ce0f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8cHJvZmVzc2lvbmFsJTIwd29tYW58ZW58MHx8fHwxNzcxMTEwNjQ2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "professional woman"
+    },
+    {
+      "id": "testimonial2",
+      "description": "Portrait of a smiling professional man.",
+      "imageUrl": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxwcm9mZXNzaW9uYWwlMjBtYW58ZW58MHx8fHwxNzcxMTQ2OTk1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "professional man"
+    },
+    {
+      "id": "testimonial3",
+      "description": "Portrait of a person in an office.",
+      "imageUrl": "https://images.unsplash.com/photo-1580894732444-8ecded7900cd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxvZmZpY2UlMjBwZXJzb258ZW58MHx8fHwxNzcxMDg5OTU4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "office person"
+    }
+  ]
 }
