@@ -6,6 +6,7 @@ import { Testimonials } from '@/components/landing/Testimonials';
 import { ContentRecommendations } from '@/components/landing/ContentRecommendations';
 import { Contact } from '@/components/landing/Contact';
 import { Footer } from '@/components/landing/Footer';
+import { AIassistant } from '@/components/landing/AIassistant';
 
 export default function HomePage() {
   return (
@@ -17,6 +18,7 @@ export default function HomePage() {
         <Solutions />
         <Testimonials />
         <ContentRecommendations />
+        <AIassistant />
         <Contact />
       </main>
       <Footer />

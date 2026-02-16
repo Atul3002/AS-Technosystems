@@ -8,6 +8,7 @@ const navLinks = [
   { href: '#services', label: 'Services' },
   { href: '#solutions', label: 'Solutions' },
   { href: '#testimonials', label: 'Clients' },
+  { href: '#ai-assistant', label: 'AI Assistant' },
   { href: '#contact', label: 'Contact Us' },
 ];
 
