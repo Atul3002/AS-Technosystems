@@ -7,7 +7,7 @@ export function Hero() {
     <section className="container flex flex-col items-center justify-center py-20 text-center md:py-32">
       <div className="mx-auto max-w-3xl">
         <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-6xl lg:text-7xl">
-          Transforming Industries with <span className="text-primary">Intelligent</span> Solutions
+          A S Technosystems
         </h1>
         <p className="mt-6 text-lg leading-8 text-foreground/80">
           A S Technosystems is at the forefront of driving digital transformation. We empower businesses with advanced digitalization, automation, and smart solutions to thrive in the modern era.
