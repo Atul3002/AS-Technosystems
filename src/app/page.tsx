@@ -6,6 +6,7 @@ import { Testimonials } from '@/components/landing/Testimonials';
 import { Contact } from '@/components/landing/Contact';
 import { Footer } from '@/components/landing/Footer';
 import { AIassistant } from '@/components/landing/AIassistant';
+import { FeaturedSolutions } from '@/components/landing/FeaturedSolutions';
 
 export default function HomePage() {
   return (
@@ -15,6 +16,7 @@ export default function HomePage() {
         <Hero />
         <Services />
         <Solutions />
+        <FeaturedSolutions />
         <Testimonials />
         <AIassistant />
         <Contact />
