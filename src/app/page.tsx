@@ -3,7 +3,6 @@ import { Hero } from '@/components/landing/Hero';
 import { Services } from '@/components/landing/Services';
 import { Solutions } from '@/components/landing/Solutions';
 import { Testimonials } from '@/components/landing/Testimonials';
-import { ContentRecommendations } from '@/components/landing/ContentRecommendations';
 import { Contact } from '@/components/landing/Contact';
 import { Footer } from '@/components/landing/Footer';
 import { AIassistant } from '@/components/landing/AIassistant';
@@ -17,7 +16,6 @@ export default function HomePage() {
         <Services />
         <Solutions />
         <Testimonials />
-        <ContentRecommendations />
         <AIassistant />
         <Contact />
       </main>
