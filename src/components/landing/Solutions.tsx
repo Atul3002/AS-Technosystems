@@ -25,6 +25,27 @@ const solutions = [
     tags: ['Retail', 'Data Analytics', 'Computer Vision'],
     image: PlaceHolderImages.find(p => p.id === 'solution3'),
   },
+  {
+    id: 'solution4',
+    title: 'Predictive Maintenance',
+    description: 'Utilize sensor data and machine learning to predict equipment failures before they happen, minimizing downtime and maintenance costs.',
+    tags: ['Industrial IoT', 'Predictive Analytics', 'Maintenance'],
+    image: PlaceHolderImages.find(p => p.id === 'solution4'),
+  },
+  {
+    id: 'solution5',
+    title: 'Automated Document Processing',
+    description: 'Use AI to extract, classify, and validate information from documents like invoices and contracts, reducing manual data entry.',
+    tags: ['RPA', 'AI', 'Document Management'],
+    image: PlaceHolderImages.find(p => p.id === 'solution5'),
+  },
+  {
+    id: 'solution6',
+    title: 'Smart Logistics & Supply Chain',
+    description: 'Optimize your supply chain with real-time tracking, demand forecasting, and automated warehouse management.',
+    tags: ['Logistics', 'Supply Chain', 'AI'],
+    image: PlaceHolderImages.find(p => p.id === 'solution6'),
+  },
 ];
 
 export function Solutions() {
@@ -54,7 +75,7 @@ export function Solutions() {
               </CardHeader>
               <CardContent className="p-6">
                 <CardTitle className="mb-2">{solution.title}</CardTitle>
-                <CardDescription className="mb-4 h-12">{solution.description}</CardDescription>
+                <CardDescription className="mb-4 h-20">{solution.description}</CardDescription>
                 <div className="flex flex-wrap gap-2 pt-2">
                   {solution.tags.map((tag) => (
                     <Badge key={tag} variant="secondary">{tag}</Badge>

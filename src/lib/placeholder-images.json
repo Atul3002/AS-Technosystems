@@ -3,20 +3,38 @@
     {
       "id": "solution1",
       "description": "A robotic arm in a modern factory.",
-      "imageUrl": "https://images.unsplash.com/photo-1701328778019-e95dedbf5346?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxyb2JvdCUyMGZhY3Rvcnl8ZW58MHx8fHwxNzcxMDY3MDU1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1643359905563-f747213c9703?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxyb2JvdCUyMGZhY3Rvcnl8ZW58MHx8fHwxNzcxMjAyNjQ1fDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "robot factory"
     },
     {
       "id": "solution2",
-      "description": "Cloud computing concept with digital icons.",
-      "imageUrl": "https://images.unsplash.com/photo-1667984390553-7f439e6ae401?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxjbG91ZCUyMGNvbXB1dGluZ3xlbnwwfHx8fDE3NzExNjc5NTh8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "cloud computing"
+      "description": "A digital twin representation of a city's infrastructure for monitoring.",
+      "imageUrl": "https://images.unsplash.com/photo-1644329770639-1a20809b82a3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxkaWdpdGFsJTIwdHdpbnxlbnwwfHx8fDE3NzEwOTY5MTF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "digital twin"
     },
     {
       "id": "solution3",
-      "description": "Smart city with data flowing between buildings.",
-      "imageUrl": "https://images.unsplash.com/photo-1519010470956-6d877008eaa4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxzbWFydCUyMGNpdHl8ZW58MHx8fHwxNzcxMTY3OTU4fDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "smart city"
+      "description": "An analytics dashboard showing various charts and graphs for retail data.",
+      "imageUrl": "https://images.unsplash.com/photo-1563144206-5c6951891290?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxyZXRhaWwlMjBhbmFseXRpY3N8ZW58MHx8fHwxNzcxMjAyNjQ1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "retail analytics"
+    },
+    {
+      "id": "solution4",
+      "description": "An industrial machine with sensor data overlays for predictive maintenance.",
+      "imageUrl": "https://images.unsplash.com/photo-1630073251867-323df09c36e0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxpbmR1c3RyaWFsJTIwbWFjaGluZXxlbnwwfHx8fDE3NzExOTYzMjl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "industrial machine"
+    },
+    {
+      "id": "solution5",
+      "description": "An illustration showing automated document processing and data extraction.",
+      "imageUrl": "https://images.unsplash.com/photo-1599408443565-829a8dfd7e9a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxkaWdpdGFsJTIwZG9jdW1lbnRzfGVufDB8fHx8MTc3MTIwMjY0NXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "digital documents"
+    },
+    {
+      "id": "solution6",
+      "description": "A modern warehouse with autonomous robots managing packages for smart logistics.",
+      "imageUrl": "https://images.unsplash.com/photo-1761195696518-6384573549ea?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxzbWFydCUyMHdhcmVob3VzZXxlbnwwfHx8fDE3NzEyMDI2NDV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "smart warehouse"
     },
     {
       "id": "testimonial1",
