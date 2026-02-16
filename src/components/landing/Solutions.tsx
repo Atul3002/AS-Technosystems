@@ -46,6 +46,20 @@ const solutions = [
     tags: ['Logistics', 'Supply Chain', 'AI'],
     image: PlaceHolderImages.find(p => p.id === 'solution6'),
   },
+  {
+    id: 'solution7',
+    title: 'ERP Modules & Business Functions',
+    description: 'Integrate and manage core business processes with our customizable ERP modules, covering everything from finance to HR.',
+    tags: ['ERP', 'Business Process', 'Finance', 'HR'],
+    image: PlaceHolderImages.find(p => p.id === 'solution7'),
+  },
+  {
+    id: 'solution8',
+    title: 'Smart Dashboard Monitoring',
+    description: 'Gain real-time insights into your operations with our intuitive and powerful smart dashboards, visualizing key performance indicators.',
+    tags: ['Dashboard', 'Analytics', 'Real-time'],
+    image: PlaceHolderImages.find(p => p.id === 'solution8'),
+  }
 ];
 
 export function Solutions() {
@@ -58,7 +72,7 @@ export function Solutions() {
             Discover some of our flagship smart solutions designed for modern challenges.
           </p>
         </div>
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
           {solutions.map((solution) => (
             <Card key={solution.id} className="overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-2">
               <CardHeader className="p-0">

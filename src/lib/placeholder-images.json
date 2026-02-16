@@ -37,6 +37,18 @@
       "imageHint": "smart warehouse"
     },
     {
+      "id": "solution7",
+      "description": "An ERP dashboard showing different modules.",
+      "imageUrl": "https://picsum.photos/seed/solution7/600/400",
+      "imageHint": "ERP dashboard"
+    },
+    {
+      "id": "solution8",
+      "description": "A smart dashboard with various charts and graphs for real-time monitoring.",
+      "imageUrl": "https://images.unsplash.com/photo-1766853107796-9d79ce6bb5fe?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxkYXNoYm9hcmQlMjBtb25pdG9yaW5nfGVufDB8fHx8MTc3MTIwMjg0Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "dashboard monitoring"
+    },
+    {
       "id": "testimonial1",
       "description": "Portrait of a smiling professional woman.",
       "imageUrl": "https://images.unsplash.com/photo-1696453424673-8b05ed67ce0f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8cHJvZmVzc2lvbmFsJTIwd29tYW58ZW58MHx8fHwxNzcxMTEwNjQ2fDA&ixlib=rb-4.1.0&q=80&w=1080",
