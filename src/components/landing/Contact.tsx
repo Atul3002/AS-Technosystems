@@ -55,7 +55,6 @@ export function Contact() {
             <h3 className="font-semibold">A S Technosystems HQ</h3>
             <p className="text-foreground/80">123 Tech Avenue, Innovation City, 12345</p>
             <p className="text-foreground/80">Email: contact@astechnosystems.dev</p>
-            <p className="text-foreground/80">Phone: (123) 456-7890</p>
           </div>
         </div>
         <Card>
