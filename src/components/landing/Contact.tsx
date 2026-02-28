@@ -55,7 +55,7 @@ export function Contact() {
             <h3 className="font-semibold text-xl">A S Technosystems</h3>
             <p className="text-foreground/80">204, Bhagyoday Residency, Borude Mala, Balikashram Road, Savedi, Ahmednagar-414003, Maharashtra</p>
             <p className="text-foreground/80 pt-2 font-medium">Email: <a href="mailto:astechnosystem@gmail.com" className="hover:text-primary transition-colors">astechnosystem@gmail.com</a></p>
-            <p className="text-foreground/80 font-medium">Phone: <a href="tel:+9196898441399" className="hover:text-primary transition-colors">96898441399</a></p>
+            <p className="text-foreground/80 font-medium">Phone: <a href="tel:+919689841399" className="hover:text-primary transition-colors">9689841399</a></p>
           </div>
         </div>
         <Card>
