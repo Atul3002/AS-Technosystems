@@ -3,11 +3,12 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CheckCircle2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const plans = [
   {
     name: "Basic",
-    price: "Free",
+    price: "₹1",
     description: "Ideal for exploring our core digitalization concepts.",
     features: [
       "Access to public solutions",
@@ -19,7 +20,7 @@ const plans = [
   },
   {
     name: "Business",
-    price: "$99/mo",
+    price: "₹2",
     description: "Advanced automation tools for growing enterprises.",
     features: [
       "Everything in Basic",
@@ -33,7 +34,7 @@ const plans = [
   },
   {
     name: "Enterprise",
-    price: "Custom",
+    price: "₹3",
     description: "Fully bespoke smart solutions tailored to your scale.",
     features: [
       "Everything in Business",
@@ -69,7 +70,7 @@ export default function SubscriptionPage() {
               <CardTitle>{plan.name}</CardTitle>
               <div className="mt-4">
                 <span className="text-4xl font-bold">{plan.price}</span>
-                {plan.price !== 'Free' && plan.price !== 'Custom' && <span className="text-muted-foreground">/mo</span>}
+                <span className="text-muted-foreground text-sm ml-1">/mo</span>
               </div>
               <CardDescription className="mt-2">{plan.description}</CardDescription>
             </CardHeader>
@@ -90,7 +91,7 @@ export default function SubscriptionPage() {
                 </Button>
               ) : (
                 <Button className="w-full" variant={plan.highlight ? 'default' : 'secondary'}>
-                  {plan.price === 'Custom' ? 'Contact Sales' : 'Upgrade'}
+                  Upgrade
                 </Button>
               )}
             </CardFooter>
@@ -113,9 +114,4 @@ export default function SubscriptionPage() {
       </Card>
     </div>
   );
-}
-
-// Helper utility
-function cn(...inputs: any[]) {
-  return inputs.filter(Boolean).join(' ');
 }
