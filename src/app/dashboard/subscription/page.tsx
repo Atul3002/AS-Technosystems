@@ -17,7 +17,7 @@ const plans = [
       "Community support",
       "1 Monthly inquiry"
     ],
-    active: true
+    active: false
   },
   {
     name: "Business",
