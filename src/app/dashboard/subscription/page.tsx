@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button';
 import { CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
 
 const plans = [
   {
@@ -48,6 +49,15 @@ const plans = [
 ];
 
 export default function SubscriptionPage() {
+  const { toast } = useToast();
+
+  const handleSubscribe = (planName: string) => {
+    toast({
+      title: "Subscription Initiated",
+      description: `You have selected the ${planName} plan. Redirecting to payment gateway...`,
+    });
+  };
+
   return (
     <div className="space-y-6">
       <div className="mx-auto max-w-4xl text-center mb-10">
@@ -58,8 +68,8 @@ export default function SubscriptionPage() {
       <div className="grid gap-6 md:grid-cols-3">
         {plans.map((plan) => (
           <Card key={plan.name} className={cn(
-            "flex flex-col relative",
-            plan.highlight && "border-primary shadow-lg scale-105"
+            "flex flex-col relative transition-all duration-300 hover:shadow-xl",
+            plan.highlight && "border-primary shadow-lg md:scale-105 z-10"
           )}>
             {plan.highlight && (
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-3 py-1 rounded-full text-xs font-bold">
@@ -90,8 +100,12 @@ export default function SubscriptionPage() {
                   Current Plan
                 </Button>
               ) : (
-                <Button className="w-full" variant={plan.highlight ? 'default' : 'secondary'}>
-                  Upgrade
+                <Button 
+                  className="w-full" 
+                  variant={plan.highlight ? 'default' : 'secondary'}
+                  onClick={() => handleSubscribe(plan.name)}
+                >
+                  Subscribe Now
                 </Button>
               )}
             </CardFooter>
