@@ -1,0 +1,418 @@
+{
+  "entities": {
+    "UserProfile": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "UserProfile",
+      "type": "object",
+      "description": "Stores application-specific user data, linked to an external authentication system. Does not contain sensitive authentication credentials.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the UserProfile entity."
+        },
+        "externalAuthId": {
+          "type": "string",
+          "description": "Identifier from the external authentication system, linking this profile to an authenticated user."
+        },
+        "firstName": {
+          "type": "string",
+          "description": "The first name of the user."
+        },
+        "lastName": {
+          "type": "string",
+          "description": "The last name of the user."
+        },
+        "email": {
+          "type": "string",
+          "description": "The primary email address of the user.",
+          "format": "email"
+        },
+        "companyName": {
+          "type": "string",
+          "description": "The name of the company the user is associated with, relevant for B2B solutions."
+        },
+        "preferredTopicIds": {
+          "type": "array",
+          "description": "References to topics of interest for content recommendations. (Relationship: UserProfile N:N Topic)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the user profile was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the user profile was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "externalAuthId",
+        "firstName",
+        "lastName",
+        "email",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Solution": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Solution",
+      "type": "object",
+      "description": "Represents a specific digitalization, automation, or smart solution offered by A S Technosystems.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Solution entity."
+        },
+        "title": {
+          "type": "string",
+          "description": "The name or title of the solution."
+        },
+        "shortDescription": {
+          "type": "string",
+          "description": "A concise summary of the solution."
+        },
+        "longDescription": {
+          "type": "string",
+          "description": "A detailed explanation of the solution's features and functionality."
+        },
+        "benefits": {
+          "type": "array",
+          "description": "A list of key benefits provided by the solution.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "URL to an image visually representing the solution.",
+          "format": "uri"
+        },
+        "iconUrl": {
+          "type": "string",
+          "description": "URL to an icon representing the solution.",
+          "format": "uri"
+        },
+        "topicIds": {
+          "type": "array",
+          "description": "References to topics associated with this solution, used for categorization and recommendations. (Relationship: Solution N:N Topic)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the solution was created in the system.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the solution was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "shortDescription",
+        "longDescription",
+        "benefits",
+        "imageUrl",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Topic": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Topic",
+      "type": "object",
+      "description": "Represents a category or area of interest, used to tag and organize solutions and content for recommendations.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Topic entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the topic (e.g., 'Digitalization', 'AI', 'Cloud Solutions')."
+        },
+        "description": {
+          "type": "string",
+          "description": "A brief description of what the topic covers."
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "URL to an optional image associated with the topic.",
+          "format": "uri"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the topic was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the topic was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "ClientStory": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ClientStory",
+      "type": "object",
+      "description": "Details a successful implementation of A S Technosystems' solutions for a client, including testimonials.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the ClientStory entity."
+        },
+        "clientName": {
+          "type": "string",
+          "description": "The name of the client featured in the success story."
+        },
+        "industry": {
+          "type": "string",
+          "description": "The industry the client operates in."
+        },
+        "problemStatement": {
+          "type": "string",
+          "description": "A description of the challenge or problem the client faced."
+        },
+        "solutionImplementedIds": {
+          "type": "array",
+          "description": "References to the solutions implemented for this client. (Relationship: ClientStory N:N Solution)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "resultsAchieved": {
+          "type": "string",
+          "description": "A description of the positive outcomes and results achieved for the client."
+        },
+        "testimonialQuote": {
+          "type": "string",
+          "description": "A direct quote from the client providing a testimonial."
+        },
+        "clientLogoUrl": {
+          "type": "string",
+          "description": "URL to the client's company logo.",
+          "format": "uri"
+        },
+        "caseStudyUrl": {
+          "type": "string",
+          "description": "URL to a detailed case study document (e.g., PDF).",
+          "format": "uri"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the client story was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the client story was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "clientName",
+        "problemStatement",
+        "solutionImplementedIds",
+        "resultsAchieved",
+        "testimonialQuote",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Inquiry": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Inquiry",
+      "type": "object",
+      "description": "Stores details of inquiries submitted through the contact form.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Inquiry entity."
+        },
+        "userProfileId": {
+          "type": "string",
+          "description": "Reference to the UserProfile if the inquiry was submitted by a logged-in user. (Relationship: UserProfile 1:N Inquiry)"
+        },
+        "fullName": {
+          "type": "string",
+          "description": "The full name of the person submitting the inquiry."
+        },
+        "email": {
+          "type": "string",
+          "description": "The email address for responding to the inquiry.",
+          "format": "email"
+        },
+        "companyName": {
+          "type": "string",
+          "description": "The name of the company the inquirer represents."
+        },
+        "subject": {
+          "type": "string",
+          "description": "The subject line or topic of the inquiry."
+        },
+        "message": {
+          "type": "string",
+          "description": "The detailed message or request from the inquirer."
+        },
+        "status": {
+          "type": "string",
+          "description": "The current processing status of the inquiry (e.g., 'New', 'In Progress', 'Resolved')."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the inquiry was submitted.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the inquiry was last updated (e.g., status change).",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "fullName",
+        "email",
+        "subject",
+        "message",
+        "status",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/userProfiles/{userProfileId}",
+        "definition": {
+          "entityName": "UserProfile",
+          "schema": {
+            "$ref": "#/backend/entities/UserProfile"
+          },
+          "description": "Stores user profile data. The `userProfileId` matches `request.auth.uid` (and the `externalAuthId` field within the document) for direct path-based authorization. Only the owner can read/write, with admin override. Includes `createdAt` and `updatedAt`."
+        }
+      },
+      {
+        "path": "/userProfiles/{userProfileId}/inquiries/{inquiryId}",
+        "definition": {
+          "entityName": "Inquiry",
+          "schema": {
+            "$ref": "#/backend/entities/Inquiry"
+          },
+          "description": "Inquiries submitted by authenticated users. The `userProfileId` in the path matches `request.auth.uid` for path-based authorization, and the `userProfileId` field within the document will be populated. Owner can create/read/update, with admin override.",
+          "params": [
+            {
+              "name": "userProfileId",
+              "description": "The unique ID of the user profile, matching `request.auth.uid`."
+            },
+            {
+              "name": "inquiryId",
+              "description": "The unique ID of the specific inquiry."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/solutions/{solutionId}",
+        "definition": {
+          "entityName": "Solution",
+          "schema": {
+            "$ref": "#/backend/entities/Solution"
+          },
+          "description": "Publicly accessible information about A S Technosystems' solutions. Read-only for all users, write/update/delete restricted to administrators. Includes denormalized `topicIds` for categorization.",
+          "params": [
+            {
+              "name": "solutionId",
+              "description": "The unique ID of the solution."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/topics/{topicId}",
+        "definition": {
+          "entityName": "Topic",
+          "schema": {
+            "$ref": "#/backend/entities/Topic"
+          },
+          "description": "Publicly accessible categories or areas of interest for solutions and content. Read-only for all users, write/update/delete restricted to administrators.",
+          "params": [
+            {
+              "name": "topicId",
+              "description": "The unique ID of the topic."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/clientStories/{clientStoryId}",
+        "definition": {
+          "entityName": "ClientStory",
+          "schema": {
+            "$ref": "#/backend/entities/ClientStory"
+          },
+          "description": "Publicly accessible details of client success stories and testimonials. Read-only for all users, write/update/delete restricted to administrators. Includes denormalized `solutionImplementedIds`.",
+          "params": [
+            {
+              "name": "clientStoryId",
+              "description": "The unique ID of the client story."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/anonymousInquiries/{inquiryId}",
+        "definition": {
+          "entityName": "Inquiry",
+          "schema": {
+            "$ref": "#/backend/entities/Inquiry"
+          },
+          "description": "Inquiries submitted by anonymous users. The `userProfileId` field will be null or omitted. Allows creation by anyone, but read/list access is restricted to administrators.",
+          "params": [
+            {
+              "name": "inquiryId",
+              "description": "The unique ID of the specific inquiry."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/roles_admin/{adminId}",
+        "definition": {
+          "entityName": "AdminRole",
+          "schema": {
+            "$ref": "#/backend/entities/AdminRole"
+          },
+          "description": "Designates users with administrative privileges. Document existence indicates an admin role, with `adminId` matching `request.auth.uid`. Used for DBAC (Database-Backed Access Control) via `exists()` checks in security rules."
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure for AST Digital Hub prioritizes secure, scalable, and debuggable access control by strictly adhering to the core design principles. The strategy focuses on **Authorization Independence via Denormalization**, **Structural Segregation**, and **Path-Based Access Modeling**.\n\n**Authorization Independence (CRITICAL):**\n1.  **User Profiles:** The `UserProfile` documents are stored at `/userProfiles/{userProfileId}`, where `{userProfileId}` is directly set to the `request.auth.uid` (which corresponds to the `externalAuthId` from the schema). This directly links the authenticated user's ID to their profile document ID. Any security rule for a user's profile can thus directly compare `request.auth.uid` with `userProfileId` in the path, eliminating the need for `get()` calls to check ownership.\n2.  **Authenticated Inquiries:** Inquiries submitted by logged-in users are stored as a subcollection under their respective user profiles: `/userProfiles/{userProfileId}/inquiries/{inquiryId}`. Here, the `{userProfileId}` in the path is again `request.auth.uid`, and the `userProfileId` field within the `Inquiry` document (if populated) will match this. This design ensures that rules for user-specific inquiries can rely solely on the path parameters and `request.auth.uid`, avoiding cross-document `get()` operations for authorization.\n3.  **Public Collections:** Collections like `/solutions`, `/topics`, and `/clientStories` hold data that is globally readable. Since there are no user-specific authorization dependencies for general read access, no denormalization for authorization is required within these documents. Admin write access is managed via a separate, explicit admin role check.\n\n**QAPs (Query as a Principal) Support:**\n1.  **Public Data (`/solutions`, `/topics`, `/clientStories`):** These collections are designed for broad public access. Security rules will simply allow `list` and `read` operations for all users (`allow read: if true;`), ensuring that any query will securely return all accessible documents without filtering issues.\n2.  **User-Owned Data (`/userProfiles/{userProfileId}`, `/userProfiles/{userProfileId}/inquiries`):** For these collections, `list` operations are secured by matching the path's `userProfileId` to `request.auth.uid`. For example, a query on `/userProfiles/{request.auth.uid}/inquiries` will only return inquiries owned by the currently authenticated user. This intrinsically filters results at the security rule layer, guaranteeing all returned documents are authorized for the requesting user.\n3.  **Anonymous Inquiries (`/anonymousInquiries`):** This collection is designed for `create` access by any user (authenticated or anonymous) but restricted `read` and `list` access primarily to administrators. This prevents anonymous users from listing or retrieving other submissions, maintaining data privacy while still allowing form submissions.\n\n**Structural Segregation:**\n*   Publicly accessible, static data (`solutions`, `topics`, `clientStories`) are in top-level collections.\n*   User-specific data (`userProfiles`) is isolated under `/userProfiles/{userProfileId}`.\n*   Authenticated user inquiries are nested under their respective user profiles (`/userProfiles/{userProfileId}/inquiries`).\n*   Anonymous inquiries are in a separate top-level collection (`/anonymousInquiries`) to clearly separate their unique security posture (create-only for public, admin-read).\n*   Administrative roles are in their own collection (`/roles_admin`) for explicit DBAC checks.\n\n**Access Modeling & Predictability:**\n*   **Path-Based Ownership:** Heavily utilized for `UserProfile` and user-specific `Inquiry` data.\n*   **Global Roles (DBAC):** Implemented using `/roles_admin/{adminId}` where existence of the document signals admin privileges, facilitating simple and atomic rule checks without `get()` calls.\n*   **Explicit State:** The `status` field in the `Inquiry` entity models finite states clearly, enhancing debuggability and predictability.\n*   **Radical Consistency:** Wildcard parameters are descriptive (e.g., `{userProfileId}`, `{solutionId}`). `externalAuthId` is consistently used as the document ID for user profiles."
+  }
+}

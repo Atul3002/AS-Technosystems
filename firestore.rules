@@ -1,0 +1,150 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * AST DIGITAL HUB SECURITY RULES
+     * 
+     * CORE PHILOSOPHY:
+     * This ruleset implements a robust, multi-tier authorization model designed for a B2B digitalization platform.
+     * It leverages Path-Based Authorization for user-owned data and Database-Backed Access Control (DBAC) 
+     * for administrative privileges.
+     * 
+     * DATA STRUCTURE:
+     * - /userProfiles/{uid}: Private user data, keyed by the Firebase Auth UID.
+     * - /userProfiles/{uid}/inquiries/{id}: Private inquiries submitted by authenticated users, nested for easy ownership checks.
+     * - /solutions, /topics, /clientStories: Publicly readable marketing and informational content.
+     * - /anonymousInquiries: A write-only "drop box" for non-authenticated users to submit contact forms.
+     * - /roles_admin: A registry of administrative users.
+     * 
+     * KEY SECURITY DECISIONS:
+     * 1. Path-Based Ownership: User profiles and their subcollections are secured by comparing the document's 
+     *    path parameter directly against 'request.auth.uid'. This avoids expensive 'get()' calls.
+     * 2. Administrative Override: Users present in the '/roles_admin' collection are granted expanded 
+     *    permissions across all collections to facilitate CRM and content management.
+     * 3. Public Read/Admin Write: Marketing content (solutions, topics, stories) is globally readable 
+     *    but strictly immutable for anyone except verified administrators.
+     * 4. Structural Segregation: Authenticated inquiries are kept separate from anonymous ones to 
+     *    enforce different privacy standards and simplify the rule logic.
+     * 
+     * DENORMALIZATION FOR AUTHORIZATION:
+     * - User IDs are enforced as document IDs for profiles.
+     * - Parent User IDs are required in the paths of authenticated inquiries.
+     * - Relational integrity is enforced by ensuring internal 'id' or 'userProfileId' fields match 
+     *   the security path during creation.
+     */
+
+    // --- GLOBAL HELPER FUNCTIONS ---
+
+    /** @description Checks if the user is authenticated with a valid UID. */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /** @description Checks if the authenticated user's UID matches the provided userId. */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /** @description Checks if a document exists and the current user owns it. */
+    function isExistingOwner(userId) {
+      return resource != null && isOwner(userId);
+    }
+
+    /** @description Checks if the user has an entry in the administrative roles collection. */
+    function isAdmin() {
+      return isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+    }
+
+    // --- COLLECTION RULES ---
+
+    /**
+     * @description User Profile data. Access restricted to the owner or administrators.
+     * @path /userProfiles/{userProfileId}
+     * @allow (get) request.auth.uid == 'user_123' requesting /userProfiles/user_123
+     * @deny (list) Anonymous user attempting to list profiles.
+     * @principle Path-based ownership and relational integrity via ID matching.
+     */
+    match /userProfiles/{userProfileId} {
+      allow get, list: if isOwner(userProfileId) || isAdmin();
+      allow create: if isOwner(userProfileId) && request.resource.data.id == userProfileId;
+      allow update: if isExistingOwner(userProfileId) && request.resource.data.id == resource.data.id;
+      allow delete: if isAdmin();
+    }
+
+    /**
+     * @description Inquiries submitted by authenticated users, nested under their profiles.
+     * @path /userProfiles/{userProfileId}/inquiries/{inquiryId}
+     * @allow (create) User 'abc' creating inquiry under /userProfiles/abc/inquiries/inq_1
+     * @deny (get) User 'abc' trying to read /userProfiles/xyz/inquiries/inq_2
+     * @principle Nested path-based ownership for private subcollections.
+     */
+    match /userProfiles/{userProfileId}/inquiries/{inquiryId} {
+      allow get, list: if isOwner(userProfileId) || isAdmin();
+      allow create: if isOwner(userProfileId) && request.resource.data.userProfileId == userProfileId;
+      allow update: if (isExistingOwner(userProfileId) || isAdmin()) && request.resource.data.userProfileId == resource.data.userProfileId;
+      allow delete: if isAdmin();
+    }
+
+    /**
+     * @description Publicly accessible solution catalog.
+     * @path /solutions/{solutionId}
+     * @allow (get) Any anonymous visitor reading a solution.
+     * @deny (create) Non-admin user attempting to create a solution.
+     * @principle Public read access with restricted admin-only writes.
+     */
+    match /solutions/{solutionId} {
+      allow get, list: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    /**
+     * @description Publicly accessible topic categories.
+     * @path /topics/{topicId}
+     * @allow (list) Any user browsing all topics.
+     * @deny (delete) Authenticated non-admin trying to delete a topic.
+     * @principle Public read access with restricted admin-only writes.
+     */
+    match /topics/{topicId} {
+      allow get, list: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    /**
+     * @description Publicly accessible client success stories.
+     * @path /clientStories/{clientStoryId}
+     * @allow (get) Any user reading a client story.
+     * @deny (update) User trying to modify a testimonial without admin rights.
+     * @principle Public read access with restricted admin-only writes.
+     */
+    match /clientStories/{clientStoryId} {
+      allow get, list: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    /**
+     * @description Contact form submissions from anonymous or non-profiled users.
+     * @path /anonymousInquiries/{inquiryId}
+     * @allow (create) Unauthenticated visitor submitting a contact form.
+     * @deny (list) Unauthenticated visitor attempting to list all submissions.
+     * @principle Write-only "drop box" pattern for public submissions.
+     */
+    match /anonymousInquiries/{inquiryId} {
+      allow get, list: if isAdmin();
+      allow create: if true;
+      allow update, delete: if isAdmin();
+    }
+
+    /**
+     * @description Registry of users with administrative roles.
+     * @path /roles_admin/{adminId}
+     * @allow (get) Any signed-in user checking for admin status.
+     * @deny (create) Any user attempting to self-promote to admin.
+     * @principle Database-Backed Access Control (DBAC) source of truth.
+     */
+    match /roles_admin/{adminId} {
+      allow get: if isSignedIn();
+      allow list, create, update, delete: if false; // Managed via Admin SDK or Console
+    }
+  }
+}
