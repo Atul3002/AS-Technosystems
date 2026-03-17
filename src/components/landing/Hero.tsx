@@ -14,7 +14,7 @@ export function Hero() {
         </p>
         <div className="mt-10 flex items-center justify-center gap-x-6">
           <Button asChild>
-            <Link href="https://studio123-plum.vercel.app/">
+            <Link href="#solutions">
               Explore Our Solutions <ArrowRight className="ml-2 h-5 w-5" />
             </Link>
           </Button>
