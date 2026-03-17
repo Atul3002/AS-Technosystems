@@ -19,10 +19,10 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  // Redirect if already logged in
+  // Redirect to dashboard if already logged in
   useEffect(() => {
     if (user && !isUserLoading) {
-      router.push('/');
+      router.push('/dashboard');
     }
   }, [user, isUserLoading, router]);
 
@@ -39,7 +39,10 @@ export default function LoginPage() {
   if (isUserLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p>Loading...</p>
+        <div className="animate-pulse flex flex-col items-center gap-4">
+          <Logo className="h-12 w-12 text-primary" />
+          <p className="text-muted-foreground">Checking authentication...</p>
+        </div>
       </div>
     );
   }
