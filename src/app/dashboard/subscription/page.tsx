@@ -58,21 +58,27 @@ export default function SubscriptionPage() {
   const { user } = useUser();
 
   const handleSubscribe = (plan: typeof plans[0]) => {
-    // Razorpay Standard Checkout Integration
+    if (typeof (window as any).Razorpay === 'undefined') {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Razorpay SDK failed to load. Please refresh the page.",
+      });
+      return;
+    }
+
     const options = {
-      key: "rzp_live_SLDr4YBwreC3VB", // Provided Key ID
-      amount: plan.amount * 100, // Amount in paise (100 paise = 1 INR)
+      key: "rzp_live_SLDr4YBwreC3VB",
+      amount: plan.amount * 100,
       currency: "INR",
       name: "A S Technosystems",
       description: `${plan.name} Plan Subscription`,
-      image: "https://picsum.photos/seed/logo/200/200", // Placeholder for company logo
+      image: "https://picsum.photos/seed/logo/200/200",
       handler: function (response: any) {
         toast({
-          title: "Payment Successful",
-          description: `Thank you for subscribing to the ${plan.name} plan. Payment ID: ${response.razorpay_payment_id}`,
+          title: "Payment Completed",
+          description: `Successfully subscribed to the ${plan.name} plan. Payment ID: ${response.razorpay_payment_id}`,
         });
-        // In a production app, you would verify this payment on your server
-        // using your Secret Key: rUEM6cJiY22kjM8hC0ge1l2S
       },
       prefill: {
         name: user?.displayName || "",
@@ -91,15 +97,6 @@ export default function SubscriptionPage() {
         }
       }
     };
-
-    if (typeof (window as any).Razorpay === 'undefined') {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Razorpay SDK failed to load. Please refresh the page.",
-      });
-      return;
-    }
 
     const rzp = new (window as any).Razorpay(options);
     rzp.open();
