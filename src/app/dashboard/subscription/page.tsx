@@ -5,11 +5,14 @@ import { Button } from '@/components/ui/button';
 import { CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { useUser } from '@/firebase';
+import Script from 'next/script';
 
 const plans = [
   {
     name: "Basic",
     price: "₹1",
+    amount: 1,
     description: "Ideal for exploring our core digitalization concepts.",
     features: [
       "Access to public solutions",
@@ -22,6 +25,7 @@ const plans = [
   {
     name: "Business",
     price: "₹2",
+    amount: 2,
     description: "Advanced automation tools for growing enterprises.",
     features: [
       "Everything in Basic",
@@ -36,6 +40,7 @@ const plans = [
   {
     name: "Enterprise",
     price: "₹3",
+    amount: 3,
     description: "Fully bespoke smart solutions tailored to your scale.",
     features: [
       "Everything in Business",
@@ -50,16 +55,60 @@ const plans = [
 
 export default function SubscriptionPage() {
   const { toast } = useToast();
+  const { user } = useUser();
 
-  const handleSubscribe = (planName: string) => {
-    toast({
-      title: "Subscription Initiated",
-      description: `You have selected the ${planName} plan. Redirecting to payment gateway...`,
-    });
+  const handleSubscribe = (plan: typeof plans[0]) => {
+    // Razorpay Standard Checkout Integration
+    const options = {
+      key: "rzp_live_SLDr4YBwreC3VB", // Provided Key ID
+      amount: plan.amount * 100, // Amount in paise (100 paise = 1 INR)
+      currency: "INR",
+      name: "A S Technosystems",
+      description: `${plan.name} Plan Subscription`,
+      image: "https://picsum.photos/seed/logo/200/200", // Placeholder for company logo
+      handler: function (response: any) {
+        toast({
+          title: "Payment Successful",
+          description: `Thank you for subscribing to the ${plan.name} plan. Payment ID: ${response.razorpay_payment_id}`,
+        });
+        // In a production app, you would verify this payment on your server
+        // using your Secret Key: rUEM6cJiY22kjM8hC0ge1l2S
+      },
+      prefill: {
+        name: user?.displayName || "",
+        email: user?.email || "",
+      },
+      theme: {
+        color: "hsl(var(--primary))",
+      },
+      modal: {
+        ondismiss: function() {
+          toast({
+            variant: "destructive",
+            title: "Payment Cancelled",
+            description: "The subscription process was interrupted.",
+          });
+        }
+      }
+    };
+
+    if (typeof (window as any).Razorpay === 'undefined') {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Razorpay SDK failed to load. Please refresh the page.",
+      });
+      return;
+    }
+
+    const rzp = new (window as any).Razorpay(options);
+    rzp.open();
   };
 
   return (
     <div className="space-y-6">
+      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
+      
       <div className="mx-auto max-w-4xl text-center mb-10">
         <h2 className="text-2xl font-bold">Choose your path to Digital Transformation</h2>
         <p className="text-muted-foreground mt-2">Scalable plans designed to fit your business maturity.</p>
@@ -95,19 +144,13 @@ export default function SubscriptionPage() {
               </ul>
             </CardContent>
             <CardFooter>
-              {plan.active ? (
-                <Button className="w-full" variant="outline" disabled>
-                  Current Plan
-                </Button>
-              ) : (
-                <Button 
-                  className="w-full" 
-                  variant={plan.highlight ? 'default' : 'secondary'}
-                  onClick={() => handleSubscribe(plan.name)}
-                >
-                  Subscribe Now
-                </Button>
-              )}
+              <Button 
+                className="w-full" 
+                variant={plan.highlight ? 'default' : 'secondary'}
+                onClick={() => handleSubscribe(plan)}
+              >
+                Subscribe Now
+              </Button>
             </CardFooter>
           </Card>
         ))}
