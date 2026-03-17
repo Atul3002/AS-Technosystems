@@ -1,12 +1,23 @@
 'use client';
 
+import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, Smartphone } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { useUser } from '@/firebase';
 import Script from 'next/script';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 const plans = [
   {
@@ -56,8 +67,27 @@ const plans = [
 export default function SubscriptionPage() {
   const { toast } = useToast();
   const { user } = useUser();
+  const [selectedPlan, setSelectedPlan] = useState<typeof plans[0] | null>(null);
+  const [isPhoneDialogOpen, setIsPhoneDialogOpen] = useState(false);
+  const [phoneNumber, setPhoneNumber] = useState('');
 
-  const handleSubscribe = (plan: typeof plans[0]) => {
+  const handleSubscribeClick = (plan: typeof plans[0]) => {
+    setSelectedPlan(plan);
+    setIsPhoneDialogOpen(true);
+  };
+
+  const confirmSubscription = () => {
+    if (!phoneNumber || phoneNumber.length < 10) {
+      toast({
+        variant: "destructive",
+        title: "Invalid Phone Number",
+        description: "Please enter a valid 10-digit mobile number.",
+      });
+      return;
+    }
+
+    if (!selectedPlan) return;
+
     if (typeof (window as any).Razorpay === 'undefined') {
       toast({
         variant: "destructive",
@@ -69,20 +99,23 @@ export default function SubscriptionPage() {
 
     const options = {
       key: "rzp_live_SLDr4YBwreC3VB",
-      amount: plan.amount * 100,
+      amount: selectedPlan.amount * 100,
       currency: "INR",
       name: "A S Technosystems",
-      description: `${plan.name} Plan Subscription`,
+      description: `${selectedPlan.name} Plan Subscription`,
       image: "https://picsum.photos/seed/logo/200/200",
       handler: function (response: any) {
         toast({
           title: "Payment Completed",
-          description: `Successfully subscribed to the ${plan.name} plan. Payment ID: ${response.razorpay_payment_id}`,
+          description: `Your subscription is now active. Payment ID: ${response.razorpay_payment_id}`,
         });
+        setIsPhoneDialogOpen(false);
+        setPhoneNumber('');
       },
       prefill: {
         name: user?.displayName || "",
         email: user?.email || "",
+        contact: phoneNumber,
       },
       theme: {
         color: "hsl(var(--primary))",
@@ -144,7 +177,7 @@ export default function SubscriptionPage() {
               <Button 
                 className="w-full" 
                 variant={plan.highlight ? 'default' : 'secondary'}
-                onClick={() => handleSubscribe(plan)}
+                onClick={() => handleSubscribeClick(plan)}
               >
                 Subscribe Now
               </Button>
@@ -166,6 +199,38 @@ export default function SubscriptionPage() {
           </Button>
         </CardContent>
       </Card>
+
+      {/* Phone Number Collection Dialog */}
+      <Dialog open={isPhoneDialogOpen} onOpenChange={setIsPhoneDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Complete Your Subscription</DialogTitle>
+            <DialogDescription>
+              Please enter your mobile number to proceed with the payment for the {selectedPlan?.name} plan.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="phone">Mobile Number</Label>
+              <div className="relative">
+                <Smartphone className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="phone"
+                  placeholder="9999999999"
+                  className="pl-9"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                  type="tel"
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsPhoneDialogOpen(false)}>Cancel</Button>
+            <Button onClick={confirmSubscription}>Proceed to Payment</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
