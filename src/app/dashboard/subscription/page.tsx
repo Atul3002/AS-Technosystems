@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, Smartphone } from 'lucide-react';
+import { CheckCircle2, Smartphone, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { useUser } from '@/firebase';
@@ -70,6 +70,7 @@ export default function SubscriptionPage() {
   const [selectedPlan, setSelectedPlan] = useState<typeof plans[0] | null>(null);
   const [isPhoneDialogOpen, setIsPhoneDialogOpen] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const handleSubscribeClick = (plan: typeof plans[0]) => {
     setSelectedPlan(plan);
@@ -92,52 +93,73 @@ export default function SubscriptionPage() {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Razorpay SDK failed to load. Please refresh the page.",
+        description: "Razorpay SDK is still loading. Please wait a moment and try again.",
       });
       return;
     }
 
+    setIsProcessing(true);
+
     const options = {
-      key: "rzp_live_SLDr4YBwreC3VB",
-      amount: selectedPlan.amount * 100,
+      key: "rzp_live_SLDr4YBwreC3VB", // Using your provided Key ID
+      amount: selectedPlan.amount * 100, // Amount in paise
       currency: "INR",
       name: "A S Technosystems",
       description: `${selectedPlan.name} Plan Subscription`,
-      image: "https://picsum.photos/seed/logo/200/200",
+      image: "https://picsum.photos/seed/ast/200/200",
       handler: function (response: any) {
-        toast({
-          title: "Payment Completed",
-          description: `Your subscription is now active. Payment ID: ${response.razorpay_payment_id}`,
-        });
+        setIsProcessing(false);
         setIsPhoneDialogOpen(false);
         setPhoneNumber('');
+        toast({
+          title: "Payment Completed",
+          description: "Your subscription is now active. Thank you for choosing A S Technosystems!",
+        });
       },
       prefill: {
-        name: user?.displayName || "",
+        name: user?.displayName || user?.email?.split('@')[0] || "Valued Client",
         email: user?.email || "",
         contact: phoneNumber,
+      },
+      notes: {
+        plan_name: selectedPlan.name,
+        user_id: user?.uid
       },
       theme: {
         color: "hsl(var(--primary))",
       },
       modal: {
         ondismiss: function() {
+          setIsProcessing(false);
           toast({
             variant: "destructive",
             title: "Payment Cancelled",
-            description: "The subscription process was interrupted.",
+            description: "The payment process was closed before completion.",
           });
         }
       }
     };
 
-    const rzp = new (window as any).Razorpay(options);
-    rzp.open();
+    try {
+      const rzp = new (window as any).Razorpay(options);
+      rzp.open();
+    } catch (err) {
+      console.error("Razorpay initialization error:", err);
+      setIsProcessing(false);
+      toast({
+        variant: "destructive",
+        title: "System Error",
+        description: "Could not open the payment gateway. Please try again later.",
+      });
+    }
   };
 
   return (
     <div className="space-y-6">
-      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
+      <Script 
+        src="https://checkout.razorpay.com/v1/checkout.js" 
+        strategy="afterInteractive" 
+      />
       
       <div className="mx-auto max-w-4xl text-center mb-10">
         <h2 className="text-2xl font-bold">Choose your path to Digital Transformation</h2>
@@ -201,12 +223,12 @@ export default function SubscriptionPage() {
       </Card>
 
       {/* Phone Number Collection Dialog */}
-      <Dialog open={isPhoneDialogOpen} onOpenChange={setIsPhoneDialogOpen}>
+      <Dialog open={isPhoneDialogOpen} onOpenChange={(open) => !isProcessing && setIsPhoneDialogOpen(open)}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Complete Your Subscription</DialogTitle>
             <DialogDescription>
-              Please enter your mobile number to proceed with the payment for the {selectedPlan?.name} plan.
+              Enter your 10-digit mobile number. We will prefill this in the secure payment gateway for your {selectedPlan?.name} plan.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
@@ -221,13 +243,25 @@ export default function SubscriptionPage() {
                   value={phoneNumber}
                   onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, '').slice(0, 10))}
                   type="tel"
+                  disabled={isProcessing}
                 />
               </div>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsPhoneDialogOpen(false)}>Cancel</Button>
-            <Button onClick={confirmSubscription}>Proceed to Payment</Button>
+            <Button variant="outline" onClick={() => setIsPhoneDialogOpen(false)} disabled={isProcessing}>
+              Cancel
+            </Button>
+            <Button onClick={confirmSubscription} disabled={isProcessing}>
+              {isProcessing ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Connecting...
+                </>
+              ) : (
+                "Proceed to Payment"
+              )}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
