@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -33,7 +32,6 @@ const plans = [
       "Community support",
       "1 Monthly inquiry"
     ],
-    active: false
   },
   {
     name: "Business",
@@ -47,7 +45,6 @@ const plans = [
       "24/7 Technical support",
       "Unlimited inquiries"
     ],
-    active: false,
     highlight: true
   },
   {
@@ -62,7 +59,6 @@ const plans = [
       "On-site consultation",
       "SLA guarantees"
     ],
-    active: false
   }
 ];
 
@@ -86,7 +82,6 @@ export default function SubscriptionPage() {
   const status = subscription?.status || 'none';
   const expiresAt = subscription?.expiresAt;
 
-  // Countdown logic
   useEffect(() => {
     if (status !== 'active' || !expiresAt) {
       setTimeLeft(null);
@@ -144,7 +139,7 @@ export default function SubscriptionPage() {
 
     const options = {
       key: "rzp_live_SLDr4YBwreC3VB", 
-      amount: selectedPlan.amount * 100, 
+      amount: 100, // Fixed at ₹1 (100 paise) for all plans as requested
       currency: "INR",
       name: "A S Technosystems",
       description: `${selectedPlan.name} Plan Subscription`,
@@ -154,7 +149,8 @@ export default function SubscriptionPage() {
         setIsPhoneDialogOpen(false);
         setPhoneNumber('');
 
-        const durationMs = selectedPlan.amount === 1 ? 24 * 60 * 60 * 1000 : 30 * 24 * 60 * 60 * 1000;
+        // Subscription lasts for 1 day (24 hours)
+        const durationMs = 24 * 60 * 60 * 1000;
         const expiresAt = new Date(Date.now() + durationMs).toISOString();
 
         if (user && db) {
@@ -225,10 +221,9 @@ export default function SubscriptionPage() {
     <div className="space-y-6">
       <Script 
         src="https://checkout.razorpay.com/v1/checkout.js" 
-        strategy="afterInteractive" 
+        strategy="lazyOnload" 
       />
       
-      {/* Active Subscription Status */}
       {status === 'active' && (
         <Card className="border-primary bg-primary/5 mb-8">
           <CardHeader className="pb-2">
@@ -319,27 +314,12 @@ export default function SubscriptionPage() {
         ))}
       </div>
 
-      <Card className="mt-12 bg-muted/50 border-dashed">
-        <CardHeader className="text-center">
-          <CardTitle>Need a Custom Solution?</CardTitle>
-          <CardDescription>
-            Our experts can design a tailored architecture for your specific automation needs.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex justify-center">
-          <Button variant="outline">
-            Schedule a Consultation
-          </Button>
-        </CardContent>
-      </Card>
-
-      {/* Phone Number Collection Dialog */}
       <Dialog open={isPhoneDialogOpen} onOpenChange={(open) => !isProcessing && setIsPhoneDialogOpen(open)}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Complete Your Subscription</DialogTitle>
             <DialogDescription>
-              Enter your 10-digit mobile number. We will prefill this in the secure payment gateway for your {selectedPlan?.name} plan.
+              Enter your 10-digit mobile number to proceed with the secure ₹1 payment for the {selectedPlan?.name} plan.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
