@@ -3,21 +3,24 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth, useUser } from '@/firebase';
-import { initiateEmailSignIn, initiateEmailSignUp } from '@/firebase/non-blocking-login';
+import { initiateEmailSignIn, initiateEmailSignUp, initiatePasswordReset } from '@/firebase/non-blocking-login';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Logo } from '@/components/icons';
+import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 
 export default function LoginPage() {
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
   const router = useRouter();
+  const { toast } = useToast();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isResetting, setIsResetting] = useState(false);
 
   // Redirect to dashboard if already logged in
   useEffect(() => {
@@ -34,6 +37,36 @@ export default function LoginPage() {
   const handleSignUp = (e: React.FormEvent) => {
     e.preventDefault();
     if (auth) initiateEmailSignUp(auth, email, password);
+  };
+
+  const handleForgotPassword = async () => {
+    if (!email) {
+      toast({
+        variant: "destructive",
+        title: "Email Required",
+        description: "Please enter your email address first to reset your password.",
+      });
+      return;
+    }
+
+    setIsResetting(true);
+    try {
+      if (auth) {
+        await initiatePasswordReset(auth, email);
+        toast({
+          title: "Reset Email Sent",
+          description: "Check your inbox for instructions to reset your password.",
+        });
+      }
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to send reset email.",
+      });
+    } finally {
+      setIsResetting(false);
+    }
   };
 
   if (isUserLoading) {
@@ -89,7 +122,17 @@ export default function LoginPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="password">Password</Label>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="password">Password</Label>
+                      <button 
+                        type="button"
+                        onClick={handleForgotPassword}
+                        className="text-xs text-primary hover:underline"
+                        disabled={isResetting}
+                      >
+                        {isResetting ? "Sending..." : "Forgot Password?"}
+                      </button>
+                    </div>
                     <Input
                       id="password"
                       type="password"
