@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, Smartphone, Loader2, Timer, Zap } from 'lucide-react';
+import { CheckCircle2, Smartphone, Loader2, Timer, Zap, ShieldCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
@@ -139,7 +139,7 @@ export default function SubscriptionPage() {
 
     const options = {
       key: "rzp_live_SLDr4YBwreC3VB", 
-      amount: 100, // Fixed at ₹1 (100 paise) for all plans as requested
+      amount: 100, // Charging exactly ₹1 (100 paise) for all plans as requested
       currency: "INR",
       name: "A S Technosystems",
       description: `${selectedPlan.name} Plan Subscription`,
@@ -151,7 +151,7 @@ export default function SubscriptionPage() {
 
         // Subscription lasts for 1 day (24 hours)
         const durationMs = 24 * 60 * 60 * 1000;
-        const expiresAt = new Date(Date.now() + durationMs).toISOString();
+        const expiresAtDate = new Date(Date.now() + durationMs).toISOString();
 
         if (user && db) {
           try {
@@ -160,7 +160,7 @@ export default function SubscriptionPage() {
               subscription: {
                 planId: selectedPlan.name,
                 status: 'active',
-                expiresAt: expiresAt
+                expiresAt: expiresAtDate
               },
               updatedAt: new Date().toISOString()
             }, { merge: true });
@@ -229,15 +229,15 @@ export default function SubscriptionPage() {
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Zap className="h-5 w-5 text-primary" />
-                <CardTitle className="text-xl">Your Active Subscription</CardTitle>
+                <ShieldCheck className="h-6 w-6 text-primary" />
+                <CardTitle className="text-xl">Active Subscription</CardTitle>
               </div>
               <div className="bg-primary text-primary-foreground px-3 py-1 rounded-full text-xs font-bold uppercase">
                 {subscription?.planId}
               </div>
             </div>
             <CardDescription>
-              Your plan is currently active and all features are unlocked.
+              Your plan is currently active. You have full access to all features.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -250,7 +250,7 @@ export default function SubscriptionPage() {
                 </div>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Expires on:</p>
+                <p className="text-sm text-muted-foreground">Expiry Date:</p>
                 <p className="font-semibold">{new Date(expiresAt!).toLocaleString()}</p>
               </div>
             </div>
@@ -259,8 +259,8 @@ export default function SubscriptionPage() {
       )}
 
       <div className="mx-auto max-w-4xl text-center mb-10">
-        <h2 className="text-2xl font-bold">Choose your path to Digital Transformation</h2>
-        <p className="text-muted-foreground mt-2">Scalable plans designed to fit your business maturity.</p>
+        <h2 className="text-2xl font-bold">Digital Transformation Plans</h2>
+        <p className="text-muted-foreground mt-2">Choose the plan that fits your business needs. All subscriptions valid for 24 hours.</p>
       </div>
 
       <div className="grid gap-6 md:grid-cols-3">
@@ -272,7 +272,7 @@ export default function SubscriptionPage() {
           )}>
             {plan.highlight && (
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-3 py-1 rounded-full text-xs font-bold">
-                RECOMMENDED
+                POPULAR
               </div>
             )}
             <CardHeader>
@@ -284,7 +284,7 @@ export default function SubscriptionPage() {
               </div>
               <div className="mt-4">
                 <span className="text-4xl font-bold">{plan.price}</span>
-                <span className="text-muted-foreground text-sm ml-1">/mo</span>
+                <span className="text-muted-foreground text-sm ml-1">/day</span>
               </div>
               <CardDescription className="mt-2">{plan.description}</CardDescription>
             </CardHeader>
@@ -306,7 +306,7 @@ export default function SubscriptionPage() {
                 disabled={status === 'active' && subscription?.planId === plan.name}
               >
                 {status === 'active' && subscription?.planId === plan.name 
-                  ? 'Current Plan' 
+                  ? 'Active Plan' 
                   : 'Subscribe Now'}
               </Button>
             </CardFooter>
@@ -317,9 +317,9 @@ export default function SubscriptionPage() {
       <Dialog open={isPhoneDialogOpen} onOpenChange={(open) => !isProcessing && setIsPhoneDialogOpen(open)}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Complete Your Subscription</DialogTitle>
+            <DialogTitle>Finalize Subscription</DialogTitle>
             <DialogDescription>
-              Enter your 10-digit mobile number to proceed with the secure ₹1 payment for the {selectedPlan?.name} plan.
+              Enter your mobile number to pay ₹1 and activate your {selectedPlan?.name} plan for 24 hours.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
@@ -350,7 +350,7 @@ export default function SubscriptionPage() {
                   Connecting...
                 </>
               ) : (
-                "Proceed to Payment"
+                "Pay ₹1 Now"
               )}
             </Button>
           </DialogFooter>
