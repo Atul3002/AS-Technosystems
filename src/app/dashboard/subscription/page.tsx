@@ -1,13 +1,15 @@
+
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CheckCircle2, Smartphone, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
-import { useUser } from '@/firebase';
+import { useUser, useFirestore } from '@/firebase';
 import Script from 'next/script';
+import { doc, setDoc } from 'firebase/firestore';
 import {
   Dialog,
   DialogContent,
@@ -67,6 +69,7 @@ const plans = [
 export default function SubscriptionPage() {
   const { toast } = useToast();
   const { user } = useUser();
+  const db = useFirestore();
   const [selectedPlan, setSelectedPlan] = useState<typeof plans[0] | null>(null);
   const [isPhoneDialogOpen, setIsPhoneDialogOpen] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -107,14 +110,40 @@ export default function SubscriptionPage() {
       name: "A S Technosystems",
       description: `${selectedPlan.name} Plan Subscription`,
       image: "https://picsum.photos/seed/ast/200/200",
-      handler: function (response: any) {
+      handler: async function (response: any) {
         setIsProcessing(false);
         setIsPhoneDialogOpen(false);
         setPhoneNumber('');
-        toast({
-          title: "Payment Completed",
-          description: "Your subscription is now active. Thank you for choosing A S Technosystems!",
-        });
+
+        // Logic for expiration: 1 day for ₹1 plan, 30 days for others
+        const durationMs = selectedPlan.amount === 1 ? 24 * 60 * 60 * 1000 : 30 * 24 * 60 * 60 * 1000;
+        const expiresAt = new Date(Date.now() + durationMs).toISOString();
+
+        if (user && db) {
+          try {
+            const userRef = doc(db, 'userProfiles', user.uid);
+            await setDoc(userRef, {
+              subscription: {
+                planId: selectedPlan.name,
+                status: 'active',
+                expiresAt: expiresAt
+              },
+              updatedAt: new Date().toISOString()
+            }, { merge: true });
+
+            toast({
+              title: "Payment Completed",
+              description: "Your subscription is now active. Thank you for choosing A S Technosystems!",
+            });
+          } catch (e) {
+            console.error("Error updating user profile:", e);
+            toast({
+              variant: "destructive",
+              title: "Profile Update Failed",
+              description: "Payment was successful, but we couldn't update your status. Please contact support.",
+            });
+          }
+        }
       },
       prefill: {
         name: user?.displayName || user?.email?.split('@')[0] || "Valued Client",

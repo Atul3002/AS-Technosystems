@@ -1,6 +1,8 @@
+
 'use client';
 
-import { useUser } from '@/firebase';
+import { useEffect } from 'react';
+import { useUser, useFirestore, useDoc, useMemoFirebase, updateDocumentNonBlocking } from '@/firebase';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { 
@@ -9,12 +11,44 @@ import {
   CloudCog, 
   ArrowUpRight,
   TrendingUp,
-  Activity
+  Activity,
+  AlertCircle,
+  CheckCircle2
 } from 'lucide-react';
 import Link from 'next/link';
+import { doc } from 'firebase/firestore';
+import { cn } from '@/lib/utils';
 
 export default function DashboardPage() {
   const { user } = useUser();
+  const firestore = useFirestore();
+
+  const profileRef = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return doc(firestore, 'userProfiles', user.uid);
+  }, [firestore, user]);
+
+  const { data: profile, isLoading: isProfileLoading } = useDoc(profileRef);
+
+  const subscription = profile?.subscription;
+  const status = subscription?.status || 'none';
+  const expiresAt = subscription?.expiresAt;
+
+  // Effect to check and handle subscription expiration
+  useEffect(() => {
+    if (status === 'active' && expiresAt && profileRef) {
+      const expiryDate = new Date(expiresAt).getTime();
+      const now = Date.now();
+
+      if (now > expiryDate) {
+        // Use non-blocking update to mark as expired
+        updateDocumentNonBlocking(profileRef, {
+          'subscription.status': 'expired',
+          updatedAt: new Date().toISOString()
+        });
+      }
+    }
+  }, [status, expiresAt, profileRef]);
 
   const activeServices = [
     { title: 'Cloud Monitoring', status: 'Active', icon: CloudCog, color: 'text-blue-500' },
@@ -37,12 +71,28 @@ export default function DashboardPage() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Current Plan</CardTitle>
-            <Zap className="h-4 w-4 text-primary" />
+            <CardTitle className="text-sm font-medium">Subscription Plan</CardTitle>
+            <Zap className={cn("h-4 w-4", status === 'active' ? "text-primary" : "text-muted-foreground")} />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold uppercase">Free</div>
-            <p className="text-xs text-muted-foreground">Limited features</p>
+            <div className="text-2xl font-bold uppercase">
+              {status === 'active' ? (subscription?.planId || 'Standard') : status === 'expired' ? 'Expired' : 'Free'}
+            </div>
+            <div className="flex items-center gap-1 mt-1">
+              {status === 'active' ? (
+                <>
+                  <CheckCircle2 className="h-3 w-3 text-green-500" />
+                  <p className="text-[10px] text-muted-foreground">Expires: {new Date(expiresAt!).toLocaleDateString()}</p>
+                </>
+              ) : status === 'expired' ? (
+                <>
+                  <AlertCircle className="h-3 w-3 text-destructive" />
+                  <p className="text-[10px] text-destructive">Plan ended</p>
+                </>
+              ) : (
+                <p className="text-xs text-muted-foreground">Limited features</p>
+              )}
+            </div>
           </CardContent>
         </Card>
         <Card>
@@ -88,17 +138,19 @@ export default function DashboardPage() {
         </Card>
 
         {/* Upgrade Call to Action */}
-        <Card className="bg-primary text-primary-foreground border-none">
+        <Card className={cn("text-primary-foreground border-none", status === 'active' ? "bg-accent" : "bg-primary")}>
           <CardHeader>
-            <CardTitle>Unlock Full Potential</CardTitle>
+            <CardTitle>{status === 'active' ? "Manage Your Success" : "Unlock Full Potential"}</CardTitle>
             <CardDescription className="text-primary-foreground/80">
-              Upgrade to a premium plan to access advanced AI automation and IoT insights.
+              {status === 'active' 
+                ? "Explore advanced features included in your current subscription tier." 
+                : "Upgrade to a premium plan to access advanced AI automation and IoT insights."}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild className="w-full" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
+            <Button asChild className="w-full" variant="secondary">
               <Link href="/dashboard/subscription">
-                View Premium Plans <ArrowUpRight className="ml-2 h-4 w-4" />
+                {status === 'active' ? "Manage Subscription" : "View Premium Plans"} <ArrowUpRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
           </CardContent>
@@ -106,9 +158,4 @@ export default function DashboardPage() {
       </div>
     </div>
   );
-}
-
-// Helper utility (inline for simplicity or import)
-function cn(...inputs: any[]) {
-  return inputs.filter(Boolean).join(' ');
 }
