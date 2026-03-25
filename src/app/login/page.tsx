@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -12,6 +13,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Logo } from '@/components/icons';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { InfoIcon } from 'lucide-react';
 
 export default function LoginPage() {
   const { user, isUserLoading } = useUser();
@@ -21,6 +24,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isResetting, setIsResetting] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
 
   // Redirect to dashboard if already logged in
   useEffect(() => {
@@ -44,7 +48,7 @@ export default function LoginPage() {
       toast({
         variant: "destructive",
         title: "Email Required",
-        description: "Please enter your email address first to reset your password.",
+        description: "Please enter your email address in the field above first.",
       });
       return;
     }
@@ -53,16 +57,17 @@ export default function LoginPage() {
     try {
       if (auth) {
         await initiatePasswordReset(auth, email);
+        setResetSent(true);
         toast({
           title: "Reset Email Sent",
-          description: "Check your inbox for instructions to reset your password.",
+          description: "Check your inbox and spam folder for instructions.",
         });
       }
     } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: error.message || "Failed to send reset email.",
+        description: error.message || "Failed to send reset email. Ensure the email is correct.",
       });
     } finally {
       setIsResetting(false);
@@ -93,6 +98,16 @@ export default function LoginPage() {
             Sign in to access your solutions and dashboard.
           </p>
         </div>
+
+        {resetSent && (
+          <Alert className="bg-primary/10 border-primary/20">
+            <InfoIcon className="h-4 w-4 text-primary" />
+            <AlertTitle>Check your email</AlertTitle>
+            <AlertDescription>
+              We've sent a password reset link to <strong>{email}</strong>. If you don't see it, please check your <strong>Spam</strong> folder.
+            </AlertDescription>
+          </Alert>
+        )}
 
         <Tabs defaultValue="login" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
@@ -127,7 +142,7 @@ export default function LoginPage() {
                       <button 
                         type="button"
                         onClick={handleForgotPassword}
-                        className="text-xs text-primary hover:underline"
+                        className="text-xs text-primary hover:underline font-medium"
                         disabled={isResetting}
                       >
                         {isResetting ? "Sending..." : "Forgot Password?"}
