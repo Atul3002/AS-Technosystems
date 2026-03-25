@@ -1,13 +1,13 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, Smartphone, Loader2 } from 'lucide-react';
+import { CheckCircle2, Smartphone, Loader2, Timer, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
-import { useUser, useFirestore } from '@/firebase';
+import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import Script from 'next/script';
 import { doc, setDoc } from 'firebase/firestore';
 import {
@@ -74,6 +74,45 @@ export default function SubscriptionPage() {
   const [isPhoneDialogOpen, setIsPhoneDialogOpen] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [timeLeft, setTimeLeft] = useState<string | null>(null);
+
+  const profileRef = useMemoFirebase(() => {
+    if (!db || !user) return null;
+    return doc(db, 'userProfiles', user.uid);
+  }, [db, user]);
+
+  const { data: profile } = useDoc(profileRef);
+  const subscription = profile?.subscription;
+  const status = subscription?.status || 'none';
+  const expiresAt = subscription?.expiresAt;
+
+  // Countdown logic
+  useEffect(() => {
+    if (status !== 'active' || !expiresAt) {
+      setTimeLeft(null);
+      return;
+    }
+
+    const interval = setInterval(() => {
+      const now = new Date().getTime();
+      const expiry = new Date(expiresAt).getTime();
+      const distance = expiry - now;
+
+      if (distance < 0) {
+        setTimeLeft("Expired");
+        clearInterval(interval);
+        return;
+      }
+
+      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+      setTimeLeft(`${hours}h ${minutes}m ${seconds}s`);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [status, expiresAt]);
 
   const handleSubscribeClick = (plan: typeof plans[0]) => {
     setSelectedPlan(plan);
@@ -104,8 +143,8 @@ export default function SubscriptionPage() {
     setIsProcessing(true);
 
     const options = {
-      key: "rzp_live_SLDr4YBwreC3VB", // Using your provided Key ID
-      amount: selectedPlan.amount * 100, // Amount in paise
+      key: "rzp_live_SLDr4YBwreC3VB", 
+      amount: selectedPlan.amount * 100, 
       currency: "INR",
       name: "A S Technosystems",
       description: `${selectedPlan.name} Plan Subscription`,
@@ -115,7 +154,6 @@ export default function SubscriptionPage() {
         setIsPhoneDialogOpen(false);
         setPhoneNumber('');
 
-        // Logic for expiration: 1 day for ₹1 plan, 30 days for others
         const durationMs = selectedPlan.amount === 1 ? 24 * 60 * 60 * 1000 : 30 * 24 * 60 * 60 * 1000;
         const expiresAt = new Date(Date.now() + durationMs).toISOString();
 
@@ -190,6 +228,41 @@ export default function SubscriptionPage() {
         strategy="afterInteractive" 
       />
       
+      {/* Active Subscription Status */}
+      {status === 'active' && (
+        <Card className="border-primary bg-primary/5 mb-8">
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Zap className="h-5 w-5 text-primary" />
+                <CardTitle className="text-xl">Your Active Subscription</CardTitle>
+              </div>
+              <div className="bg-primary text-primary-foreground px-3 py-1 rounded-full text-xs font-bold uppercase">
+                {subscription?.planId}
+              </div>
+            </div>
+            <CardDescription>
+              Your plan is currently active and all features are unlocked.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col md:flex-row md:items-center gap-6 mt-4">
+              <div className="flex items-center gap-3 bg-background p-4 rounded-lg border shadow-sm">
+                <Timer className="h-8 w-8 text-primary animate-pulse" />
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase font-semibold">Time Remaining</p>
+                  <p className="text-2xl font-mono font-bold text-primary">{timeLeft || "--h --m --s"}</p>
+                </div>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Expires on:</p>
+                <p className="font-semibold">{new Date(expiresAt!).toLocaleString()}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <div className="mx-auto max-w-4xl text-center mb-10">
         <h2 className="text-2xl font-bold">Choose your path to Digital Transformation</h2>
         <p className="text-muted-foreground mt-2">Scalable plans designed to fit your business maturity.</p>
@@ -199,7 +272,8 @@ export default function SubscriptionPage() {
         {plans.map((plan) => (
           <Card key={plan.name} className={cn(
             "flex flex-col relative transition-all duration-300 hover:shadow-xl",
-            plan.highlight && "border-primary shadow-lg md:scale-105 z-10"
+            plan.highlight && "border-primary shadow-lg md:scale-105 z-10",
+            status === 'active' && subscription?.planId === plan.name && "border-green-500 bg-green-50/10"
           )}>
             {plan.highlight && (
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-3 py-1 rounded-full text-xs font-bold">
@@ -207,7 +281,12 @@ export default function SubscriptionPage() {
               </div>
             )}
             <CardHeader>
-              <CardTitle>{plan.name}</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle>{plan.name}</CardTitle>
+                {status === 'active' && subscription?.planId === plan.name && (
+                  <CheckCircle2 className="h-5 w-5 text-green-500" />
+                )}
+              </div>
               <div className="mt-4">
                 <span className="text-4xl font-bold">{plan.price}</span>
                 <span className="text-muted-foreground text-sm ml-1">/mo</span>
@@ -229,8 +308,11 @@ export default function SubscriptionPage() {
                 className="w-full" 
                 variant={plan.highlight ? 'default' : 'secondary'}
                 onClick={() => handleSubscribeClick(plan)}
+                disabled={status === 'active' && subscription?.planId === plan.name}
               >
-                Subscribe Now
+                {status === 'active' && subscription?.planId === plan.name 
+                  ? 'Current Plan' 
+                  : 'Subscribe Now'}
               </Button>
             </CardFooter>
           </Card>

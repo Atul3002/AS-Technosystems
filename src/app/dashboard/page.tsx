@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useUser, useFirestore, useDoc, useMemoFirebase, updateDocumentNonBlocking } from '@/firebase';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,7 +13,8 @@ import {
   TrendingUp,
   Activity,
   AlertCircle,
-  CheckCircle2
+  CheckCircle2,
+  Timer
 } from 'lucide-react';
 import Link from 'next/link';
 import { doc } from 'firebase/firestore';
@@ -22,6 +23,7 @@ import { cn } from '@/lib/utils';
 export default function DashboardPage() {
   const { user } = useUser();
   const firestore = useFirestore();
+  const [timeLeft, setTimeLeft] = useState<string | null>(null);
 
   const profileRef = useMemoFirebase(() => {
     if (!firestore || !user) return null;
@@ -34,14 +36,48 @@ export default function DashboardPage() {
   const status = subscription?.status || 'none';
   const expiresAt = subscription?.expiresAt;
 
-  // Effect to check and handle subscription expiration
+  // Countdown logic
+  useEffect(() => {
+    if (status !== 'active' || !expiresAt) {
+      setTimeLeft(null);
+      return;
+    }
+
+    const interval = setInterval(() => {
+      const now = new Date().getTime();
+      const expiry = new Date(expiresAt).getTime();
+      const distance = expiry - now;
+
+      if (distance < 0) {
+        setTimeLeft("Expired");
+        clearInterval(interval);
+        // Trigger auto-expire update if not already handled
+        if (profileRef) {
+          updateDocumentNonBlocking(profileRef, {
+            'subscription.status': 'expired',
+            updatedAt: new Date().toISOString()
+          });
+        }
+        return;
+      }
+
+      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+      setTimeLeft(`${hours}h ${minutes}m ${seconds}s`);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [status, expiresAt, profileRef]);
+
+  // Effect to check and handle subscription expiration (backup logic)
   useEffect(() => {
     if (status === 'active' && expiresAt && profileRef) {
       const expiryDate = new Date(expiresAt).getTime();
       const now = Date.now();
 
       if (now > expiryDate) {
-        // Use non-blocking update to mark as expired
         updateDocumentNonBlocking(profileRef, {
           'subscription.status': 'expired',
           updatedAt: new Date().toISOString()
@@ -78,17 +114,25 @@ export default function DashboardPage() {
             <div className="text-2xl font-bold uppercase">
               {status === 'active' ? (subscription?.planId || 'Standard') : status === 'expired' ? 'Expired' : 'Free'}
             </div>
-            <div className="flex items-center gap-1 mt-1">
+            <div className="flex flex-col gap-1 mt-1">
               {status === 'active' ? (
                 <>
-                  <CheckCircle2 className="h-3 w-3 text-green-500" />
-                  <p className="text-[10px] text-muted-foreground">Expires: {new Date(expiresAt!).toLocaleDateString()}</p>
+                  <div className="flex items-center gap-1">
+                    <CheckCircle2 className="h-3 w-3 text-green-500" />
+                    <p className="text-[10px] text-muted-foreground font-medium">ACTIVE</p>
+                  </div>
+                  {timeLeft && (
+                    <div className="flex items-center gap-1 text-primary">
+                      <Timer className="h-3 w-3" />
+                      <p className="text-[10px] font-bold">{timeLeft} remaining</p>
+                    </div>
+                  )}
                 </>
               ) : status === 'expired' ? (
-                <>
-                  <AlertCircle className="h-3 w-3 text-destructive" />
-                  <p className="text-[10px] text-destructive">Plan ended</p>
-                </>
+                <div className="flex items-center gap-1 text-destructive">
+                  <AlertCircle className="h-3 w-3" />
+                  <p className="text-[10px] font-bold uppercase">Plan ended</p>
+                </div>
               ) : (
                 <p className="text-xs text-muted-foreground">Limited features</p>
               )}
