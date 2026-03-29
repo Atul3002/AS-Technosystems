@@ -12,13 +12,24 @@ import { doc, setDoc } from 'firebase/firestore';
 
 const plans = [
   {
+    name: "Beginner",
+    price: "₹1",
+    amount: 1,
+    description: "Essential tools for digital starters.",
+    features: [
+      "Access to public solutions",
+      "Smart Dashboard access",
+      "AI Assistant (Basic)",
+      "Email support"
+    ],
+  },
+  {
     name: "Business",
     price: "₹2",
     amount: 2,
     description: "Advanced automation tools for growing enterprises.",
     features: [
-      "Access to public solutions",
-      "Smart Dashboard access",
+      "Everything in Beginner",
       "Priority AI Assistant",
       "24/7 Technical support",
       "Unlimited inquiries"
@@ -219,7 +230,7 @@ export default function SubscriptionPage() {
         <p className="text-muted-foreground mt-2">Choose the plan that fits your business needs. All subscriptions valid for 24 hours.</p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:max-w-4xl lg:mx-auto">
+      <div className="grid gap-6 md:grid-cols-3 lg:max-w-6xl lg:mx-auto">
         {plans.map((plan) => (
           <Card key={plan.name} className={cn(
             "flex flex-col relative transition-all duration-300 hover:shadow-xl",
@@ -240,7 +251,7 @@ export default function SubscriptionPage() {
               </div>
               <div className="mt-4">
                 <span className="text-4xl font-bold">{plan.price}</span>
-                <span className="text-muted-foreground text-sm ml-1">/day</span>
+                <span className="text-muted-foreground text-sm ml-1">/24h</span>
               </div>
               <CardDescription className="mt-2">{plan.description}</CardDescription>
             </CardHeader>
@@ -259,7 +270,7 @@ export default function SubscriptionPage() {
                 className="w-full" 
                 variant={plan.highlight ? 'default' : 'secondary'}
                 onClick={() => handleSubscribeClick(plan)}
-                disabled={status === 'active' && subscription?.planId === plan.name || isProcessing}
+                disabled={(status === 'active' && subscription?.planId === plan.name) || isProcessing}
               >
                 {isProcessing ? (
                   <>
