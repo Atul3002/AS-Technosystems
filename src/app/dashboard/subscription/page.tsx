@@ -3,12 +3,13 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, Loader2, Timer, ShieldCheck } from 'lucide-react';
+import { CheckCircle2, Loader2, Timer, ShieldCheck, PartyPopper } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import Script from 'next/script';
 import { doc, setDoc } from 'firebase/firestore';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const plans = [
   {
@@ -20,7 +21,7 @@ const plans = [
       "Access to public solutions",
       "Smart Dashboard access",
       "AI Assistant (Basic)",
-      "Email support"
+      "24h Validity"
     ],
   },
   {
@@ -32,7 +33,7 @@ const plans = [
       "Everything in Beginner",
       "Priority AI Assistant",
       "24/7 Technical support",
-      "Unlimited inquiries"
+      "24h Validity"
     ],
     highlight: true
   },
@@ -45,8 +46,7 @@ const plans = [
       "Everything in Business",
       "Custom IoT integration",
       "Dedicated account manager",
-      "On-site consultation",
-      "SLA guarantees"
+      "24h Validity"
     ],
   }
 ];
@@ -56,6 +56,7 @@ export default function SubscriptionPage() {
   const { user } = useUser();
   const db = useFirestore();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [paymentDone, setPaymentDone] = useState(false);
   const [timeLeft, setTimeLeft] = useState<string | null>(null);
 
   const profileRef = useMemoFirebase(() => {
@@ -106,10 +107,11 @@ export default function SubscriptionPage() {
     }
 
     setIsProcessing(true);
+    setPaymentDone(false);
 
     const options = {
       key: "rzp_live_SLDr4YBwreC3VB", 
-      amount: 100, // Charging exactly ₹1 (100 paise) for all plans as per requirement
+      amount: 100, // Charging exactly ₹1 (100 paise) for all plans
       currency: "INR",
       name: "A S Technosystems",
       description: `${plan.name} Plan Subscription`,
@@ -133,27 +135,24 @@ export default function SubscriptionPage() {
               updatedAt: new Date().toISOString()
             }, { merge: true });
 
+            setPaymentDone(true);
             toast({
               title: "Payment Completed",
-              description: "Your subscription is now active. Thank you for choosing A S Technosystems!",
+              description: "Payment is done! Your subscription is now active.",
             });
           } catch (e) {
             console.error("Error updating user profile:", e);
             toast({
               variant: "destructive",
-              title: "Profile Update Failed",
-              description: "Payment was successful, but we couldn't update your status. Please contact support.",
+              title: "Update Failed",
+              description: "Payment successful, but status update failed. Please contact support.",
             });
           }
         }
       },
       prefill: {
-        name: user?.displayName || user?.email?.split('@')[0] || "Valued Client",
+        name: user?.displayName || user?.email?.split('@')[0] || "Client",
         email: user?.email || "",
-      },
-      notes: {
-        plan_name: plan.name,
-        user_id: user?.uid
       },
       theme: {
         color: "hsl(var(--primary))",
@@ -161,11 +160,6 @@ export default function SubscriptionPage() {
       modal: {
         ondismiss: function() {
           setIsProcessing(false);
-          toast({
-            variant: "destructive",
-            title: "Payment Cancelled",
-            description: "The payment process was closed before completion.",
-          });
         }
       }
     };
@@ -174,13 +168,8 @@ export default function SubscriptionPage() {
       const rzp = new (window as any).Razorpay(options);
       rzp.open();
     } catch (err) {
-      console.error("Razorpay initialization error:", err);
+      console.error("Razorpay error:", err);
       setIsProcessing(false);
-      toast({
-        variant: "destructive",
-        title: "System Error",
-        description: "Could not open the payment gateway. Please try again later.",
-      });
     }
   };
 
@@ -191,6 +180,16 @@ export default function SubscriptionPage() {
         strategy="lazyOnload" 
       />
       
+      {paymentDone && (
+        <Alert className="border-green-500 bg-green-50 text-green-800">
+          <PartyPopper className="h-4 w-4 text-green-600" />
+          <AlertTitle>Success!</AlertTitle>
+          <AlertDescription className="font-medium">
+            Payment is done! Your account has been upgraded successfully.
+          </AlertDescription>
+        </Alert>
+      )}
+
       {status === 'active' && (
         <Card className="border-primary bg-primary/5 mb-8">
           <CardHeader className="pb-2">
