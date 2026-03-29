@@ -12,24 +12,12 @@ import { doc, setDoc } from 'firebase/firestore';
 
 const plans = [
   {
-    name: "Basic",
-    price: "₹1",
-    amount: 1,
-    description: "Ideal for exploring our core digitalization concepts.",
-    features: [
-      "Access to public solutions",
-      "Standard AI Assistant access",
-      "Community support",
-      "1 Monthly inquiry"
-    ],
-  },
-  {
     name: "Business",
     price: "₹2",
     amount: 2,
     description: "Advanced automation tools for growing enterprises.",
     features: [
-      "Everything in Basic",
+      "Access to public solutions",
       "Smart Dashboard access",
       "Priority AI Assistant",
       "24/7 Technical support",
@@ -110,7 +98,7 @@ export default function SubscriptionPage() {
 
     const options = {
       key: "rzp_live_SLDr4YBwreC3VB", 
-      amount: 100, // Charging exactly ₹1 (100 paise) for all plans
+      amount: 100, // Charging exactly ₹1 (100 paise) for all plans as per requirement
       currency: "INR",
       name: "A S Technosystems",
       description: `${plan.name} Plan Subscription`,
@@ -231,11 +219,11 @@ export default function SubscriptionPage() {
         <p className="text-muted-foreground mt-2">Choose the plan that fits your business needs. All subscriptions valid for 24 hours.</p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-2 lg:max-w-4xl lg:mx-auto">
         {plans.map((plan) => (
           <Card key={plan.name} className={cn(
             "flex flex-col relative transition-all duration-300 hover:shadow-xl",
-            plan.highlight && "border-primary shadow-lg md:scale-105 z-10",
+            plan.highlight && "border-primary shadow-lg scale-105 z-10",
             status === 'active' && subscription?.planId === plan.name && "border-green-500 bg-green-50/10"
           )}>
             {plan.highlight && (
