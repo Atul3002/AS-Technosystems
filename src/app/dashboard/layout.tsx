@@ -6,7 +6,6 @@ import { useUser, useAuth } from '@/firebase';
 import { Logo } from '@/components/icons';
 import { Button } from '@/components/ui/button';
 import { 
-  LayoutDashboard, 
   LogOut, 
   User as UserIcon,
   CreditCard
@@ -46,7 +45,6 @@ export default function DashboardLayout({
   }
 
   const navItems = [
-    { label: 'Overview', href: '/dashboard', icon: LayoutDashboard },
     { label: 'Subscription', href: '/dashboard/subscription', icon: CreditCard },
   ];
 
