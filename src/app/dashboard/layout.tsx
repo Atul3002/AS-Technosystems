@@ -2,18 +2,20 @@
 
 import { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { useUser, useAuth } from '@/firebase';
+import { useUser, useAuth, useFirestore, useDoc } from '@/firebase';
 import { Logo } from '@/components/icons';
 import { Button } from '@/components/ui/button';
 import { 
   LogOut, 
   User as UserIcon,
   CreditCard,
-  LayoutDashboard
+  LayoutDashboard,
+  ShieldAlert
 } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { signOut } from 'firebase/auth';
+import { doc } from 'firebase/firestore';
 
 export default function DashboardLayout({
   children,
@@ -21,9 +23,14 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const { user, isUserLoading } = useUser();
+  const db = useFirestore();
   const auth = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+
+  // Fetch subscription to handle sidebar visibility
+  const subscriptionRef = user ? doc(db, 'subscriptions', user.uid) : null;
+  const { data: subscription, isLoading: isSubscriptionLoading } = useDoc(subscriptionRef);
 
   // Auth redirect: Ensure only logged in users can see this area
   useEffect(() => {
@@ -45,9 +52,11 @@ export default function DashboardLayout({
     );
   }
 
+  const isSubscribed = subscription?.isActive && new Date() < new Date(subscription?.endTime);
+
   const navItems = [
-    { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-    { label: 'Subscription', href: '/dashboard/subscription', icon: CreditCard },
+    { label: 'Overview', href: '/dashboard', icon: LayoutDashboard, requiresSub: true },
+    { label: 'Subscription', href: '/dashboard/subscription', icon: CreditCard, requiresSub: false },
   ];
 
   return (
@@ -61,29 +70,36 @@ export default function DashboardLayout({
           </Link>
 
           <nav className="flex-1 space-y-1">
-            {navItems.map((item) => (
-              <Link
-                key={item.label}
-                href={item.href}
-                className={cn(
-                  "group flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-muted",
-                  pathname === item.href ? "bg-muted text-primary" : "text-muted-foreground"
-                )}
-              >
-                <item.icon className={cn("mr-3 h-5 w-5", pathname === item.href ? "text-primary" : "text-muted-foreground")} />
-                {item.label}
-              </Link>
-            ))}
+            {navItems.map((item) => {
+              const isDisabled = item.requiresSub && !isSubscribed;
+              if (isDisabled) return null; // Don't show Overview if not subscribed
+
+              return (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  className={cn(
+                    "group flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-muted",
+                    pathname === item.href ? "bg-muted text-primary" : "text-muted-foreground"
+                  )}
+                >
+                  <item.icon className={cn("mr-3 h-5 w-5", pathname === item.href ? "text-primary" : "text-muted-foreground")} />
+                  {item.label}
+                </Link>
+              );
+            })}
           </nav>
 
           <div className="mt-auto border-t pt-4">
             <div className="mb-4 flex items-center gap-3 px-3">
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary">
-                <UserIcon className="h-5 w-5" />
+                {isSubscribed ? <UserIcon className="h-5 w-5" /> : <ShieldAlert className="h-5 w-5 text-destructive" />}
               </div>
               <div className="overflow-hidden">
                 <p className="truncate text-xs font-medium text-foreground">{user.email}</p>
-                <p className="text-[10px] text-muted-foreground">Authenticated User</p>
+                <p className="text-[10px] text-muted-foreground">
+                  {isSubscribed ? 'Active Subscriber' : 'Inactive Account'}
+                </p>
               </div>
             </div>
             <Button 
