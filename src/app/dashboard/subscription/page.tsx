@@ -3,22 +3,12 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, Smartphone, Loader2, Timer, Zap, ShieldCheck } from 'lucide-react';
+import { CheckCircle2, Loader2, Timer, ShieldCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import Script from 'next/script';
 import { doc, setDoc } from 'firebase/firestore';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 
 const plans = [
   {
@@ -66,9 +56,6 @@ export default function SubscriptionPage() {
   const { toast } = useToast();
   const { user } = useUser();
   const db = useFirestore();
-  const [selectedPlan, setSelectedPlan] = useState<typeof plans[0] | null>(null);
-  const [isPhoneDialogOpen, setIsPhoneDialogOpen] = useState(false);
-  const [phoneNumber, setPhoneNumber] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [timeLeft, setTimeLeft] = useState<string | null>(null);
 
@@ -110,22 +97,6 @@ export default function SubscriptionPage() {
   }, [status, expiresAt]);
 
   const handleSubscribeClick = (plan: typeof plans[0]) => {
-    setSelectedPlan(plan);
-    setIsPhoneDialogOpen(true);
-  };
-
-  const confirmSubscription = () => {
-    if (!phoneNumber || phoneNumber.length < 10) {
-      toast({
-        variant: "destructive",
-        title: "Invalid Phone Number",
-        description: "Please enter a valid 10-digit mobile number.",
-      });
-      return;
-    }
-
-    if (!selectedPlan) return;
-
     if (typeof (window as any).Razorpay === 'undefined') {
       toast({
         variant: "destructive",
@@ -139,15 +110,13 @@ export default function SubscriptionPage() {
 
     const options = {
       key: "rzp_live_SLDr4YBwreC3VB", 
-      amount: 100, // Charging exactly ₹1 (100 paise) for all plans as requested
+      amount: 100, // Charging exactly ₹1 (100 paise) for all plans
       currency: "INR",
       name: "A S Technosystems",
-      description: `${selectedPlan.name} Plan Subscription`,
+      description: `${plan.name} Plan Subscription`,
       image: "https://picsum.photos/seed/ast/200/200",
       handler: async function (response: any) {
         setIsProcessing(false);
-        setIsPhoneDialogOpen(false);
-        setPhoneNumber('');
 
         // Subscription lasts for 1 day (24 hours)
         const durationMs = 24 * 60 * 60 * 1000;
@@ -158,7 +127,7 @@ export default function SubscriptionPage() {
             const userRef = doc(db, 'userProfiles', user.uid);
             await setDoc(userRef, {
               subscription: {
-                planId: selectedPlan.name,
+                planId: plan.name,
                 status: 'active',
                 expiresAt: expiresAtDate
               },
@@ -182,10 +151,9 @@ export default function SubscriptionPage() {
       prefill: {
         name: user?.displayName || user?.email?.split('@')[0] || "Valued Client",
         email: user?.email || "",
-        contact: phoneNumber,
       },
       notes: {
-        plan_name: selectedPlan.name,
+        plan_name: plan.name,
         user_id: user?.uid
       },
       theme: {
@@ -303,59 +271,23 @@ export default function SubscriptionPage() {
                 className="w-full" 
                 variant={plan.highlight ? 'default' : 'secondary'}
                 onClick={() => handleSubscribeClick(plan)}
-                disabled={status === 'active' && subscription?.planId === plan.name}
+                disabled={status === 'active' && subscription?.planId === plan.name || isProcessing}
               >
-                {status === 'active' && subscription?.planId === plan.name 
-                  ? 'Active Plan' 
-                  : 'Subscribe Now'}
+                {isProcessing ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  status === 'active' && subscription?.planId === plan.name 
+                    ? 'Active Plan' 
+                    : 'Subscribe Now'
+                )}
               </Button>
             </CardFooter>
           </Card>
         ))}
       </div>
-
-      <Dialog open={isPhoneDialogOpen} onOpenChange={(open) => !isProcessing && setIsPhoneDialogOpen(open)}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Finalize Subscription</DialogTitle>
-            <DialogDescription>
-              Enter your mobile number to pay ₹1 and activate your {selectedPlan?.name} plan for 24 hours.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="phone">Mobile Number</Label>
-              <div className="relative">
-                <Smartphone className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="phone"
-                  placeholder="9999999999"
-                  className="pl-9"
-                  value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                  type="tel"
-                  disabled={isProcessing}
-                />
-              </div>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsPhoneDialogOpen(false)} disabled={isProcessing}>
-              Cancel
-            </Button>
-            <Button onClick={confirmSubscription} disabled={isProcessing}>
-              {isProcessing ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Connecting...
-                </>
-              ) : (
-                "Pay ₹1 Now"
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
