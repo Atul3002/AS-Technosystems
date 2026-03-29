@@ -8,7 +8,8 @@ import { Button } from '@/components/ui/button';
 import { 
   LayoutDashboard, 
   LogOut, 
-  User as UserIcon
+  User as UserIcon,
+  CreditCard
 } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
@@ -46,6 +47,7 @@ export default function DashboardLayout({
 
   const navItems = [
     { label: 'Overview', href: '/dashboard', icon: LayoutDashboard },
+    { label: 'Subscription', href: '/dashboard/subscription', icon: CreditCard },
   ];
 
   return (
@@ -104,7 +106,7 @@ export default function DashboardLayout({
               {navItems.find(item => item.href === pathname)?.label || 'Dashboard'}
             </h1>
             <p className="text-muted-foreground">
-              Welcome to your A S Technosystems workspace.
+              Welcome back to your A S Technosystems workspace.
             </p>
           </div>
         </header>
