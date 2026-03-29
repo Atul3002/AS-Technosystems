@@ -2,20 +2,17 @@
 
 import { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { useUser, useAuth, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
+import { useUser, useAuth } from '@/firebase';
 import { Logo } from '@/components/icons';
 import { Button } from '@/components/ui/button';
 import { 
   LayoutDashboard, 
-  CreditCard, 
-  Settings, 
   LogOut, 
   User as UserIcon
 } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { signOut } from 'firebase/auth';
-import { doc } from 'firebase/firestore';
 
 export default function DashboardLayout({
   children,
@@ -24,39 +21,22 @@ export default function DashboardLayout({
 }) {
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
-  const db = useFirestore();
   const router = useRouter();
   const pathname = usePathname();
 
-  const profileRef = useMemoFirebase(() => {
-    if (!db || !user) return null;
-    return doc(db, 'userProfiles', user.uid);
-  }, [db, user]);
-
-  const { data: profile, isLoading: isProfileLoading } = useDoc(profileRef);
-
-  const isActive = profile?.subscription?.status === 'active';
-
-  // Auth redirect
+  // Auth redirect: Ensure only logged in users can see this area
   useEffect(() => {
     if (!isUserLoading && !user) {
       router.push('/login');
     }
   }, [user, isUserLoading, router]);
 
-  // Subscription gate: Redirect non-active users to subscription page if they try to access overview
-  useEffect(() => {
-    if (!isUserLoading && !isProfileLoading && user && !isActive && pathname === '/dashboard') {
-      router.push('/dashboard/subscription');
-    }
-  }, [isActive, isProfileLoading, isUserLoading, user, pathname, router]);
-
   const handleLogout = async () => {
     await signOut(auth);
     router.push('/');
   };
 
-  if (isUserLoading || !user || isProfileLoading) {
+  if (isUserLoading || !user) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -64,14 +44,9 @@ export default function DashboardLayout({
     );
   }
 
-  // Filter nav items based on subscription status
-  const allNavItems = [
-    { label: 'Overview', href: '/dashboard', icon: LayoutDashboard, requiresActive: true },
-    { label: 'Subscription', href: '/dashboard/subscription', icon: CreditCard, requiresActive: false },
-    { label: 'Account Settings', href: '#', icon: Settings, requiresActive: true },
+  const navItems = [
+    { label: 'Overview', href: '/dashboard', icon: LayoutDashboard },
   ];
-
-  const navItems = allNavItems.filter(item => !item.requiresActive || isActive);
 
   return (
     <div className="flex min-h-screen bg-muted/30">
@@ -106,9 +81,7 @@ export default function DashboardLayout({
               </div>
               <div className="overflow-hidden">
                 <p className="truncate text-xs font-medium text-foreground">{user.email}</p>
-                <p className="text-[10px] text-muted-foreground capitalize">
-                  {isActive ? (profile?.subscription?.planId || 'Subscriber') : 'Free Tier'}
-                </p>
+                <p className="text-[10px] text-muted-foreground">Authenticated User</p>
               </div>
             </div>
             <Button 
@@ -128,16 +101,11 @@ export default function DashboardLayout({
         <header className="mb-8 flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">
-              {allNavItems.find(item => item.href === pathname)?.label || 'Dashboard'}
+              {navItems.find(item => item.href === pathname)?.label || 'Dashboard'}
             </h1>
             <p className="text-muted-foreground">
-              Welcome back to your A S Technosystems dashboard.
+              Welcome to your A S Technosystems workspace.
             </p>
-          </div>
-          <div className="flex items-center gap-4">
-            <Button variant="outline" size="sm">
-              Support
-            </Button>
           </div>
         </header>
         {children}
