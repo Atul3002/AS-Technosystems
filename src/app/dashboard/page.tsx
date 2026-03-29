@@ -1,29 +1,21 @@
+
 'use client';
 
 import { useUser, useFirestore, useDoc } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ShieldCheck, Zap, Clock, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { ShieldCheck, Zap, BarChart3, Clock } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
 
 export default function DashboardPage() {
-  const { user, isUserLoading } = useUser();
+  const { user } = useUser();
   const db = useFirestore();
-  const router = useRouter();
 
-  const userProfileRef = user ? doc(db, 'userProfiles', user.uid) : null;
-  const { data: profile, isLoading: isProfileLoading } = useDoc(userProfileRef);
+  const subscriptionRef = user ? doc(db, 'subscriptions', user.uid) : null;
+  const { data: subscription, isLoading } = useDoc(subscriptionRef);
 
-  useEffect(() => {
-    if (!isUserLoading && !isProfileLoading && profile && profile.subscription?.status !== 'active') {
-      router.push('/dashboard/subscription');
-    }
-  }, [profile, isUserLoading, isProfileLoading, router]);
-
-  if (isUserLoading || isProfileLoading) {
+  if (isLoading) {
     return (
       <div className="flex h-48 items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -31,67 +23,70 @@ export default function DashboardPage() {
     );
   }
 
+  if (!subscription || !subscription.isActive) {
+    return (
+      <Card className="border-destructive/20 bg-destructive/5">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <AlertCircle className="h-5 w-5 text-destructive" />
+            No Active Subscription
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p>You don't have an active plan. Please subscribe to access all features.</p>
+          <Button asChild>
+            <Link href="/dashboard/subscription">Go to Subscriptions</Link>
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <div className="space-y-8">
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-6 md:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Subscription Status</CardTitle>
+            <CardTitle className="text-sm font-medium">Status</CardTitle>
             <ShieldCheck className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-primary uppercase">Active</div>
-            <p className="text-xs text-muted-foreground">Premium features unlocked</p>
+            <p className="text-xs text-muted-foreground">Full access granted</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Plan</CardTitle>
+            <CardTitle className="text-sm font-medium">Amount Paid</CardTitle>
             <Zap className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{profile?.subscription?.planId?.replace('plan_', 'Plan ') || 'N/A'}</div>
-            <p className="text-xs text-muted-foreground">Valid for 24 hours</p>
+            <div className="text-2xl font-bold">₹{subscription.amount}</div>
+            <p className="text-xs text-muted-foreground">Subscription fee</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Usage Limit</CardTitle>
-            <BarChart3 className="h-4 w-4 text-primary" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">Unlimited</div>
-            <p className="text-xs text-muted-foreground">Across all modules</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Expires In</CardTitle>
+            <CardTitle className="text-sm font-medium">Expires On</CardTitle>
             <Clock className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">~24h</div>
-            <p className="text-xs text-muted-foreground">Until renewal required</p>
+            <div className="text-lg font-bold">
+              {new Date(subscription.endTime).toLocaleString()}
+            </div>
+            <p className="text-xs text-muted-foreground">Valid for 24 hours from purchase</p>
           </CardContent>
         </Card>
       </div>
 
       <Card className="border-primary/20 bg-primary/5">
         <CardHeader>
-          <CardTitle>Welcome to AST Digital Hub</CardTitle>
+          <CardTitle>Welcome back!</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent>
           <p className="text-lg">
-            Your payment was successful and your account is now fully activated. Explore our suite of digitalization, automation, and smart solutions.
+            Your payment was successful and your account is now active. Explore our suite of solutions.
           </p>
-          <div className="flex flex-wrap gap-4">
-            <Button asChild>
-              <Link href="/#solutions">Browse Solutions</Link>
-            </Button>
-            <Button variant="outline" asChild>
-              <Link href="/#ai-assistant">Ask AI Assistant</Link>
-            </Button>
-          </div>
         </CardContent>
       </Card>
     </div>
