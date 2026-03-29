@@ -39,6 +39,18 @@ export default function DashboardLayout({
     }
   }, [user, isUserLoading, router]);
 
+  // Expiry check for global layout: Redirect away from /dashboard root if sub is invalid
+  useEffect(() => {
+    if (isUserLoading || isSubscriptionLoading || !user) return;
+
+    const isSubscribed = subscription?.isActive && new Date() < new Date(subscription?.endTime);
+    
+    // If on the main dashboard but not subscribed, redirect to subscription page
+    if (pathname === '/dashboard' && !isSubscribed) {
+      router.push('/dashboard/subscription');
+    }
+  }, [pathname, subscription, isUserLoading, isSubscriptionLoading, user, router]);
+
   const handleLogout = async () => {
     await signOut(auth);
     router.push('/');
@@ -72,7 +84,7 @@ export default function DashboardLayout({
           <nav className="flex-1 space-y-1">
             {navItems.map((item) => {
               const isDisabled = item.requiresSub && !isSubscribed;
-              if (isDisabled) return null; // Don't show Overview if not subscribed
+              if (isDisabled) return null; // Don't show protected links if not subscribed
 
               return (
                 <Link
@@ -98,7 +110,7 @@ export default function DashboardLayout({
               <div className="overflow-hidden">
                 <p className="truncate text-xs font-medium text-foreground">{user.email}</p>
                 <p className="text-[10px] text-muted-foreground">
-                  {isSubscribed ? 'Active Subscriber' : 'Inactive Account'}
+                  {isSubscribed ? 'Active Subscriber' : 'Subscription Required'}
                 </p>
               </div>
             </div>

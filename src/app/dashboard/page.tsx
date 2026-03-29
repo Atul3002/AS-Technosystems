@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useUser, useFirestore, useDoc } from '@/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ShieldCheck, Zap, Clock, AlertCircle, LayoutDashboard } from 'lucide-react';
+import { ShieldCheck, Zap, Clock, LayoutDashboard } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export default function DashboardPage() {
@@ -19,19 +19,26 @@ export default function DashboardPage() {
   const { data: subscription, isLoading: isSubscriptionLoading } = useDoc(subscriptionRef);
 
   useEffect(() => {
-    if (isUserLoading || isSubscriptionLoading || !user || !subscription || isProcessingExpiration) {
+    if (isUserLoading || isSubscriptionLoading || !user || isProcessingExpiration) {
       return;
     }
 
     const checkSubscription = async () => {
       const now = new Date();
+      
+      // Case 1: No subscription document found
+      if (!subscription) {
+        router.push('/dashboard/subscription');
+        return;
+      }
+
       const endTime = new Date(subscription.endTime);
 
-      // 1. If not active or current time > endTime
+      // Case 2: Subscription exists but is either marked inactive OR the current time has passed the end time
       if (!subscription.isActive || now > endTime) {
         setIsProcessingExpiration(true);
 
-        // 2. If it was active but expired, update Firestore
+        // If it was still marked active in DB but actually expired, update Firestore
         if (subscription.isActive && now > endTime) {
           try {
             if (subscriptionRef) {
@@ -42,7 +49,7 @@ export default function DashboardPage() {
           }
         }
 
-        // 3. Show alert and redirect
+        // Show alert and redirect
         toast({
           variant: 'destructive',
           title: 'Subscription Expired',
@@ -64,8 +71,9 @@ export default function DashboardPage() {
     );
   }
 
-  // Final check for render (the useEffect handles the redirect, but we need a fallback for the render cycle)
-  if (!subscription || !subscription.isActive || new Date() > new Date(subscription.endTime)) {
+  // Final safety check: If logic above hasn't redirected yet but sub is invalid, don't render content
+  const isValidSub = subscription && subscription.isActive && new Date() < new Date(subscription.endTime);
+  if (!isValidSub) {
     return null;
   }
 
@@ -94,14 +102,16 @@ export default function DashboardPage() {
         </Card>
         <Card className="shadow-md">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Expires In</CardTitle>
+            <CardTitle className="text-sm font-medium">Expires At</CardTitle>
             <Clock className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
             <div className="text-lg font-bold">
-              {new Date(subscription.endTime).toLocaleString()}
+              {new Date(subscription.endTime).toLocaleTimeString()}
             </div>
-            <p className="text-xs text-muted-foreground">Valid for 24 hours</p>
+            <p className="text-xs text-muted-foreground">
+              {new Date(subscription.endTime).toLocaleDateString()}
+            </p>
           </CardContent>
         </Card>
       </div>
