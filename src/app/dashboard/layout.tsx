@@ -8,7 +8,8 @@ import { Button } from '@/components/ui/button';
 import { 
   LogOut, 
   User as UserIcon,
-  CreditCard
+  CreditCard,
+  LayoutDashboard
 } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
@@ -45,6 +46,7 @@ export default function DashboardLayout({
   }
 
   const navItems = [
+    { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
     { label: 'Subscription', href: '/dashboard/subscription', icon: CreditCard },
   ];
 
